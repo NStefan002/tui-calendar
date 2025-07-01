@@ -74,7 +74,7 @@ func (m model) View() string {
 	// days of the week (Mon-Sun)
 	daysOfWeek := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 	for _, day := range daysOfWeek {
-		sb.WriteString(baseStyle.Render(fmt.Sprintf("%-5s", day)) + " ")
+		sb.WriteString(baseStyle.Render(fmt.Sprintf("%3s", day)) + " ")
 	}
 	sb.WriteString("\n\n")
 
@@ -87,7 +87,7 @@ func (m model) View() string {
 		weekday = 7
 	}
 	for i := 1; i < weekday; i++ {
-		sb.WriteString("        ")
+		sb.WriteString("      ")
 	}
 
 	for day := firstDay; !day.After(lastDay); day = day.AddDate(0, 0, 1) {
@@ -96,11 +96,11 @@ func (m model) View() string {
 
 		var dayStr string
 		if isSelected {
-			dayStr = selectedDateStyle.Render(fmt.Sprintf("%5d", day.Day()))
+			dayStr = selectedDateStyle.Render(fmt.Sprintf("%3d", day.Day()))
 		} else if isToday {
-			dayStr = todayStyle.Render(fmt.Sprintf("%5d", day.Day()))
+			dayStr = todayStyle.Render(fmt.Sprintf("%3d", day.Day()))
 		} else {
-			dayStr = baseStyle.Render(fmt.Sprintf("%5d", day.Day()))
+			dayStr = baseStyle.Render(fmt.Sprintf("%3d", day.Day()))
 		}
 		sb.WriteString(dayStr + " ")
 
