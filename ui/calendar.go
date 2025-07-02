@@ -8,6 +8,7 @@ import (
 
 	// "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -87,7 +88,7 @@ func (m model) View() string {
 		weekday = 7
 	}
 	for i := 1; i < weekday; i++ {
-		sb.WriteString("      ")
+		sb.WriteString(strings.Repeat(" ", lipgloss.Width(baseStyle.Render(daysOfWeek[0])) + 1))
 	}
 
 	for day := firstDay; !day.After(lastDay); day = day.AddDate(0, 0, 1) {
