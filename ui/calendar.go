@@ -18,13 +18,16 @@ type eventsMsg map[string][]*calendar.Event
 
 func (m model) Init() tea.Cmd {
 	m.loading = true
-	return func() tea.Msg {
-		events, err := fetchEvents(m.calendarService, m.viewing)
-		if err != nil {
-			return errMsg{err}
-		}
-		return eventsMsg(events)
-	}
+	return tea.Batch(
+		m.spinner.Tick, // start spinner on app load
+		func() tea.Msg {
+			events, err := fetchEvents(m.calendarService, m.viewing)
+			if err != nil {
+				return errMsg{err}
+			}
+			return eventsMsg(events)
+		},
+	)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -41,7 +44,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// custom message for events
 	case errMsg:
 		m.loading = false
-		// TODO: optionally set error in model
+		m.errMessage = msg.Error()
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -61,14 +64,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selected = m.selected.AddDate(0, 1, 0) // go to next month
 		case "r":
 			m.loading = true
-			return m, func() tea.Msg {
-				events, err := fetchEvents(m.calendarService, m.viewing)
-				if err != nil {
-					return errMsg{err}
-				}
-				return eventsMsg(events)
-			}
+			return m, tea.Batch(
+				m.spinner.Tick, // start spinner
+				func() tea.Msg {
+					events, err := fetchEvents(m.calendarService, m.viewing)
+					if err != nil {
+						return errMsg{err}
+					}
+					return eventsMsg(events)
+				},
+			)
 		}
+
+	// spinner update
+	default:
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
 	}
 	if m.selected.Month() != m.viewing.Month() || m.selected.Year() != m.viewing.Year() {
 		m.viewing = m.selected // update viewing month if selected date is not in current viewing month
@@ -79,7 +91,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.loading {
-		return "Loading calendar events..."
+		return m.spinner.View() + " Loading calendar events..."
+	}
+
+	if len(m.errMessage) > 0 {
+		return "There was an error: " + m.errMessage
 	}
 
 	var sb strings.Builder

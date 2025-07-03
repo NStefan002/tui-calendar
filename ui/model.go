@@ -3,6 +3,7 @@ package ui
 import (
 	"time"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -31,9 +32,14 @@ type model struct {
 	screenHeight int // height of the terminal screen
 
 	loading bool // whether the calendar is currently loading data
+	spinner spinner.Model
+
+	errMessage string // error message to display, if any
 }
 
 func CreateModel(srv *calendar.Service) model {
+	s := spinner.New()
+	s.Spinner = spinner.Line
 	return model{
 		now:             time.Now(),
 		viewing:         time.Now(),
@@ -44,5 +50,7 @@ func CreateModel(srv *calendar.Service) model {
 		screenWidth:     80,
 		screenHeight:    24,
 		loading:         false,
+		errMessage:      "",
+		spinner:         s,
 	}
 }
