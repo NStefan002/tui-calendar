@@ -145,7 +145,7 @@ func (m model) View() string {
 	}
 
 	sb.WriteString("\n")
-	return sb.String()
+	return m.centerText(sb.String())
 }
 
 func fetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calendar.Event, error) {
@@ -180,4 +180,17 @@ func fetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calend
 	}
 
 	return events, nil
+}
+
+// center each line of text based on the screen width
+func (m model) centerText(text string) string {
+	// calculate the padding needed to center the text
+	padding := max((m.screenWidth-lipgloss.Width(text))/2, 0)
+
+	// split the text into lines and center each line
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		lines[i] = strings.Repeat(" ", padding) + line
+	}
+	return strings.Join(lines, "\n")
 }
