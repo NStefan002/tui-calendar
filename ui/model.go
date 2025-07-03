@@ -32,3 +32,17 @@ type model struct {
 
 	loading bool // whether the calendar is currently loading data
 }
+
+func CreateModel(srv *calendar.Service) model {
+	return model{
+		now:             time.Now(),
+		viewing:         time.Now(),
+		selected:        time.Now(),
+		calendarService: srv,
+		events:          make(map[string][]*calendar.Event),
+		viewMode:        CalendarView,
+		screenWidth:     80,
+		screenHeight:    24,
+		loading:         false,
+	}
+}

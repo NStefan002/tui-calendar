@@ -12,19 +12,6 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-func CreateModel() model {
-	return model{
-		now:             time.Now(),
-		viewing:         time.Now(),
-		selected:        time.Now(),
-		calendarService: nil,
-		events:          make(map[string][]*calendar.Event),
-		viewMode:        CalendarView,
-		screenWidth:     80,
-		screenHeight:    24,
-		loading:         false,
-	}
-}
 
 func (m model) Init() tea.Cmd {
 	return nil
