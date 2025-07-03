@@ -3,7 +3,6 @@ package ui
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
@@ -56,6 +55,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selected = m.selected.AddDate(0, 0, -7) // go to previous week
 		case "down", "j":
 			m.selected = m.selected.AddDate(0, 0, 7) // go to next week
+		case "pageup", "pgup", "ctrl+u":
+			m.selected = m.selected.AddDate(0, -1, 0) // go to previous month
+		case "pagedown", "pgdown", "ctrl+d":
+			m.selected = m.selected.AddDate(0, 1, 0) // go to next month
 		case "r":
 			m.loading = true
 			return m, func() tea.Msg {
@@ -127,13 +130,8 @@ func (m model) View() string {
 	// display events (if any) for the selected date
 	dateKey := m.selected.Format("2006-01-02")
 	if events, ok := m.events[dateKey]; ok && len(events) > 0 {
-		eventsHeader := eventHeaderStyle.Render("Events for "+m.selected.Format("January 2, 2006"))
-		sb.WriteString("\n\n" + eventsHeader + "\n")
-		sort.Slice(events, func(i, j int) bool {
-			startTimeI, _ := time.Parse(time.RFC3339, events[i].Start.DateTime)
-			startTimeJ, _ := time.Parse(time.RFC3339, events[j].Start.DateTime)
-			return startTimeI.Before(startTimeJ)
-		})
+		eventsHeader := eventHeaderStyle.Render("Events for " + m.selected.Format("January 2, 2006"))
+		sb.WriteString("\n\n\n" + eventsHeader + "\n")
 		for _, event := range events {
 			eventTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
 			if err != nil {
@@ -141,12 +139,12 @@ func (m model) View() string {
 			}
 			eventTimeStr := eventStyle.Render(eventTime.Format("15:04"))
 			eventTitle := eventStyle.Render(event.Summary)
-			eventTimeTitleGap := strings.Repeat(" ", lipgloss.Width(eventsHeader) - lipgloss.Width(eventTimeStr) - lipgloss.Width(eventTitle))
+			eventTimeTitleGap := strings.Repeat(" ", lipgloss.Width(eventsHeader)-lipgloss.Width(eventTimeStr)-lipgloss.Width(eventTitle))
 			sb.WriteString(fmt.Sprintf("\n%s%s%s", eventTimeStr, eventTimeTitleGap, eventTitle))
 		}
 	}
 
-
+	sb.WriteString("\n")
 	return sb.String()
 }
 
