@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -12,9 +13,19 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
+type errMsg struct{ error }
+
+type eventsMsg map[string][]*calendar.Event
 
 func (m model) Init() tea.Cmd {
-	return nil
+	m.loading = true
+	return func() tea.Msg {
+		events, err := fetchEvents(m.calendarService, m.viewing)
+		if err != nil {
+			return errMsg{err}
+		}
+		return eventsMsg(events)
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -22,6 +33,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.screenWidth = msg.Width
 		m.screenHeight = msg.Height
+
+	// custom message for events
+	case eventsMsg:
+		m.events = msg
+		m.loading = false
+
+	// custom message for events
+	case errMsg:
+		m.loading = false
+		// TODO: optionally set error in model
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -37,9 +58,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.selected = m.selected.AddDate(0, 0, 7) // go to next week
 		case "r":
 			m.loading = true
-			// TODO:
-			// m.events = fetchEvents(m.calendarService, m.viewing)
-			m.loading = false
+			return m, func() tea.Msg {
+				events, err := fetchEvents(m.calendarService, m.viewing)
+				if err != nil {
+					return errMsg{err}
+				}
+				return eventsMsg(events)
+			}
 		}
 	}
 	if m.selected.Month() != m.viewing.Month() || m.selected.Year() != m.viewing.Year() {
@@ -75,7 +100,7 @@ func (m model) View() string {
 		weekday = 7
 	}
 	for i := 1; i < weekday; i++ {
-		sb.WriteString(strings.Repeat(" ", lipgloss.Width(baseStyle.Render(daysOfWeek[0])) + 1))
+		sb.WriteString(strings.Repeat(" ", lipgloss.Width(baseStyle.Render(daysOfWeek[0]))+1))
 	}
 
 	for day := firstDay; !day.After(lastDay); day = day.AddDate(0, 0, 1) {
@@ -92,23 +117,6 @@ func (m model) View() string {
 		}
 		sb.WriteString(dayStr + " ")
 
-		dateKey := day.Format("2006-01-02")
-		if events, ok := m.events[dateKey]; ok && len(events) > 0 {
-			sort.Slice(events, func(i, j int) bool {
-				startTimeI, _ := time.Parse(time.RFC3339, events[i].Start.DateTime)
-				startTimeJ, _ := time.Parse(time.RFC3339, events[j].Start.DateTime)
-				return startTimeI.Before(startTimeJ)
-			})
-			for _, event := range events {
-				eventTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
-				if err != nil {
-					continue
-				}
-				eventStr := eventStyle.Render(fmt.Sprintf(" %s: %s", eventTime.Format("15:04"), event.Summary))
-				sb.WriteString("\n" + eventStr)
-			}
-		}
-
 		// break line at Sunday (weekday = 0)
 		w := int(day.Weekday())
 		if w == 0 {
@@ -116,5 +124,62 @@ func (m model) View() string {
 		}
 	}
 
+	// display events (if any) for the selected date
+	dateKey := m.selected.Format("2006-01-02")
+	if events, ok := m.events[dateKey]; ok && len(events) > 0 {
+		eventsHeader := eventHeaderStyle.Render("Events for "+m.selected.Format("January 2, 2006"))
+		sb.WriteString("\n\n" + eventsHeader + "\n")
+		sort.Slice(events, func(i, j int) bool {
+			startTimeI, _ := time.Parse(time.RFC3339, events[i].Start.DateTime)
+			startTimeJ, _ := time.Parse(time.RFC3339, events[j].Start.DateTime)
+			return startTimeI.Before(startTimeJ)
+		})
+		for _, event := range events {
+			eventTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
+			if err != nil {
+				continue
+			}
+			eventTimeStr := eventStyle.Render(eventTime.Format("15:04"))
+			eventTitle := eventStyle.Render(event.Summary)
+			eventTimeTitleGap := strings.Repeat(" ", lipgloss.Width(eventsHeader) - lipgloss.Width(eventTimeStr) - lipgloss.Width(eventTitle))
+			sb.WriteString(fmt.Sprintf("\n%s%s%s", eventTimeStr, eventTimeTitleGap, eventTitle))
+		}
+	}
+
+
 	return sb.String()
+}
+
+func fetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calendar.Event, error) {
+	start := time.Date(viewing.Year(), viewing.Month(), 1, 0, 0, 0, 0, viewing.Location())
+	end := start.AddDate(0, 1, 0)
+
+	events := make(map[string][]*calendar.Event)
+
+	call := srv.Events.List("primary").
+		ShowDeleted(false).
+		SingleEvents(true).
+		TimeMin(start.Format(time.RFC3339)).
+		TimeMax(end.Format(time.RFC3339)).
+		OrderBy("startTime")
+
+	resp, err := call.Context(context.Background()).Do()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch events: %w", err)
+	}
+
+	for _, item := range resp.Items {
+		date := item.Start.DateTime
+		if date == "" {
+			date = item.Start.Date // all-day event
+		}
+		t, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			continue
+		}
+		dateKey := t.Format("2006-01-02")
+		events[dateKey] = append(events[dateKey], item)
+	}
+
+	return events, nil
 }

@@ -5,6 +5,7 @@ go 1.23.1
 require (
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/joho/godotenv v1.5.1
 	google.golang.org/api v0.239.0
 )
 
