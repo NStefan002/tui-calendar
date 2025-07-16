@@ -28,6 +28,8 @@ type model struct {
 
 	viewMode CalendarViewMode // current view mode of the calendar
 
+	selectedEventIdx int // index of the currently selected event in the list
+
 	screenWidth  int // width of the terminal screen
 	screenHeight int // height of the terminal screen
 
@@ -41,16 +43,17 @@ func CreateModel(srv *calendar.Service) model {
 	s := spinner.New()
 	s.Spinner = spinner.Line
 	return model{
-		now:             time.Now(),
-		viewing:         time.Now(),
-		selected:        time.Now(),
-		calendarService: srv,
-		events:          make(map[string][]*calendar.Event),
-		viewMode:        CalendarView,
-		screenWidth:     80,
-		screenHeight:    24,
-		loading:         false,
-		errMessage:      "",
-		spinner:         s,
+		now:              time.Now(),
+		viewing:          time.Now(),
+		selected:         time.Now(),
+		calendarService:  srv,
+		events:           make(map[string][]*calendar.Event),
+		viewMode:         CalendarView,
+		selectedEventIdx: 0,
+		screenWidth:      80,
+		screenHeight:     24,
+		loading:          true,
+		errMessage:       "",
+		spinner:          s,
 	}
 }

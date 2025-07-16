@@ -9,9 +9,9 @@ import (
 var (
 	baseStyle = lipgloss.NewStyle().
 			Padding(0, 1).
-			// Border(lipgloss.NormalBorder()).
-			// BorderForeground(lipgloss.Color("240")).
-			Background(lipgloss.Color("235"))
+		// Border(lipgloss.NormalBorder()).
+		// BorderForeground(lipgloss.Color("240")).
+		Background(lipgloss.Color("235"))
 
 	headerStyle = baseStyle.Background(lipgloss.Color("39")).Bold(true).Align(lipgloss.Center)
 
@@ -22,4 +22,10 @@ var (
 	eventHeaderStyle = baseStyle.Background(lipgloss.Color("33")).Bold(true)
 
 	eventStyle = baseStyle.Foreground(lipgloss.Color("252"))
+
+	eventDetailsStyle = baseStyle.Padding(0, 1).Border(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("240")).Width(50)
+
+	eventListStyle = baseStyle.Padding(0, 1).Border(lipgloss.NormalBorder()).BorderForeground(lipgloss.Color("240"))
+
+	eventListSelectedStyle = eventListStyle.Background(lipgloss.Color("57")).Foreground(lipgloss.Color("230")).Bold(true)
 )
