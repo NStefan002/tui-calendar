@@ -3,12 +3,10 @@ package ui
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	// "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -112,7 +110,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.loading {
-		return m.centerText(m.spinner.View() + " Loading calendar events...")
+		return centerText(m.spinner.View()+" Loading calendar events...", m.screenWidth)
 	}
 
 	if len(m.errMessage) > 0 {
@@ -121,7 +119,7 @@ func (m model) View() string {
 
 	switch m.viewMode {
 	case CalendarView:
-		return m.CalendarView()
+		return m.calendarView()
 	case DetailsView:
 		return m.detailsView()
 	default:
@@ -161,17 +159,4 @@ func fetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calend
 	}
 
 	return events, nil
-}
-
-// center each line of text based on the screen width
-func (m model) centerText(text string) string {
-	// calculate the padding needed to center the text
-	padding := max((m.screenWidth-lipgloss.Width(text))/2, 0)
-
-	// split the text into lines and center each line
-	lines := strings.Split(text, "\n")
-	for i, line := range lines {
-		lines[i] = strings.Repeat(" ", padding) + line
-	}
-	return strings.Join(lines, "\n")
 }

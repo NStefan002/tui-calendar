@@ -7,10 +7,9 @@ import (
 
 	// "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
-	"google.golang.org/api/calendar/v3"
 )
 
-func (m model) CalendarView() string {
+func (m model) calendarView() string {
 	var sb strings.Builder
 
 	// header (month and year)
@@ -74,14 +73,14 @@ func (m model) CalendarView() string {
 	}
 
 	sb.WriteString("\n")
-	return m.centerText(sb.String())
+	return centerText(sb.String(), m.screenWidth)
 }
 
 func (m model) detailsView() string {
 	dateKey := m.selected.Format("2006-01-02")
 	events := m.events[dateKey]
 	if len(events) == 0 {
-		return m.centerText("No events for this day.")
+		return centerText("No events for this day.", m.screenWidth)
 	}
 
 	selected := events[m.selectedEventIdx]
@@ -128,22 +127,5 @@ func (m model) detailsView() string {
 
 	// footer navigation
 	footer := "\n[j/k] Move  [escq] Back"
-	return m.centerText(combined + footer)
-}
-
-
-func formatTime(dt *calendar.EventDateTime) string {
-	if dt.DateTime != "" {
-		t, err := time.Parse(time.RFC3339, dt.DateTime)
-		if err == nil {
-			return t.Format("Mon Jan 2, 15:04")
-		}
-	}
-	if dt.Date != "" {
-		t, err := time.Parse("2006-01-02", dt.Date)
-		if err == nil {
-			return t.Format("Mon Jan 2 (All-day)")
-		}
-	}
-	return "Unknown"
+	return centerText(combined+footer, m.screenWidth)
 }
