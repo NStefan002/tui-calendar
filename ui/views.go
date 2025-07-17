@@ -13,7 +13,7 @@ func (m model) calendarView() string {
 	var sb strings.Builder
 
 	// header (month and year)
-	sb.WriteString(headerStyle.Render(m.viewing.Format("January 2006")) + "\n\n\n")
+	sb.WriteString(headerStyle.Render(m.cm.viewing.Format("January 2006")) + "\n\n\n")
 
 	// days of the week (Mon-Sun)
 	daysOfWeek := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
@@ -22,7 +22,7 @@ func (m model) calendarView() string {
 	}
 	sb.WriteString("\n\n")
 
-	firstDay := time.Date(m.viewing.Year(), m.viewing.Month(), 1, 0, 0, 0, 0, m.viewing.Location())
+	firstDay := time.Date(m.cm.viewing.Year(), m.cm.viewing.Month(), 1, 0, 0, 0, 0, m.cm.viewing.Location())
 	lastDay := firstDay.AddDate(0, 1, -1)
 
 	// Align calendar to start on Monday (make Sunday = 7)
@@ -35,8 +35,8 @@ func (m model) calendarView() string {
 	}
 
 	for day := firstDay; !day.After(lastDay); day = day.AddDate(0, 0, 1) {
-		isToday := day.Year() == m.now.Year() && day.Month() == m.now.Month() && day.Day() == m.now.Day()
-		isSelected := day.Year() == m.selected.Year() && day.Month() == m.selected.Month() && day.Day() == m.selected.Day()
+		isToday := day.Year() == m.cm.now.Year() && day.Month() == m.cm.now.Month() && day.Day() == m.cm.now.Day()
+		isSelected := day.Year() == m.cm.selected.Year() && day.Month() == m.cm.selected.Month() && day.Day() == m.cm.selected.Day()
 
 		var dayStr string
 		if isSelected {
@@ -56,9 +56,9 @@ func (m model) calendarView() string {
 	}
 
 	// display events (if any) for the selected date
-	dateKey := m.selected.Format("2006-01-02")
+	dateKey := m.cm.selected.Format("2006-01-02")
 	if events, ok := m.events[dateKey]; ok && len(events) > 0 {
-		eventsHeader := eventHeaderStyle.Render("Events for " + m.selected.Format("January 2, 2006"))
+		eventsHeader := eventHeaderStyle.Render("Events for " + m.cm.selected.Format("January 2, 2006"))
 		sb.WriteString("\n\n\n" + eventsHeader + "\n")
 		for _, event := range events {
 			eventTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
@@ -77,13 +77,13 @@ func (m model) calendarView() string {
 }
 
 func (m model) detailsView() string {
-	dateKey := m.selected.Format("2006-01-02")
+	dateKey := m.cm.selected.Format("2006-01-02")
 	events := m.events[dateKey]
 	if len(events) == 0 {
 		return centerText("No events for this day.", m.screenWidth)
 	}
 
-	selected := events[m.selectedEventIdx]
+	selected := events[m.dm.idx]
 
 	// left column: full details
 	var details strings.Builder
@@ -114,7 +114,7 @@ func (m model) detailsView() string {
 			}
 		}
 		line := fmt.Sprintf("%s  %s", timeStr, event.Summary)
-		if i == m.selectedEventIdx {
+		if i == m.dm.idx {
 			list.WriteString(eventListSelectedStyle.Render(line) + "\n")
 		} else {
 			list.WriteString(eventListStyle.Render(line) + "\n")
@@ -128,4 +128,12 @@ func (m model) detailsView() string {
 	// footer navigation
 	footer := "\n[j/k] Move  [escq] Back"
 	return centerText(combined+footer, m.screenWidth)
+}
+
+func (m model) editEventView() string {
+	return "EDIT EVENT VIEW (not implemented yet)"
+}
+
+func (m model) addEventView() string {
+	return "ADD EVENT VIEW (not implemented yet)"
 }

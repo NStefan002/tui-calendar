@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	// "github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/api/calendar/v3"
 )
@@ -19,7 +18,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		m.spinner.Tick, // start spinner on app load
 		func() tea.Msg {
-			events, err := fetchEvents(m.calendarService, m.viewing)
+			events, err := fetchEvents(m.calendarService, m.cm.viewing)
 			if err != nil {
 				return errMsg{err}
 			}
@@ -51,23 +50,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "q", "ctrl+c":
 				return m, tea.Quit
 			case "left", "h":
-				m.selected = m.selected.AddDate(0, 0, -1) // go to previous day
+				m.cm.selected = m.cm.selected.AddDate(0, 0, -1) // go to previous day
 			case "right", "l":
-				m.selected = m.selected.AddDate(0, 0, 1) // go to next day
+				m.cm.selected = m.cm.selected.AddDate(0, 0, 1) // go to next day
 			case "up", "k":
-				m.selected = m.selected.AddDate(0, 0, -7) // go to previous week
+				m.cm.selected = m.cm.selected.AddDate(0, 0, -7) // go to previous week
 			case "down", "j":
-				m.selected = m.selected.AddDate(0, 0, 7) // go to next week
+				m.cm.selected = m.cm.selected.AddDate(0, 0, 7) // go to next week
 			case "pageup", "pgup", "ctrl+u":
-				m.selected = m.selected.AddDate(0, -1, 0) // go to previous month
+				m.cm.selected = m.cm.selected.AddDate(0, -1, 0) // go to previous month
 			case "pagedown", "pgdown", "ctrl+d":
-				m.selected = m.selected.AddDate(0, 1, 0) // go to next month
+				m.cm.selected = m.cm.selected.AddDate(0, 1, 0) // go to next month
 			case "r":
 				m.loading = true
 				return m, tea.Batch(
 					m.spinner.Tick, // start spinner
 					func() tea.Msg {
-						events, err := fetchEvents(m.calendarService, m.viewing)
+						events, err := fetchEvents(m.calendarService, m.cm.viewing)
 						if err != nil {
 							return errMsg{err}
 						}
@@ -76,6 +75,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			case "enter":
 				m.viewMode = DetailsView
+				m.lastViewMode = CalendarView
+			case "a", "A":
+				m.viewMode = AddEventView
+				m.lastViewMode = CalendarView
 			}
 
 		case DetailsView:
@@ -83,15 +86,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "q", "ctrl+c":
 				return m, tea.Quit
 			case "esc":
-				m.viewMode = CalendarView
+				m.viewMode = m.lastViewMode
 			case "down", "j":
-				if len(m.events) > 0 && m.selectedEventIdx < len(m.events[m.selected.Format("2006-01-02")])-1 {
-					m.selectedEventIdx++
+				if len(m.events) > 0 && m.dm.idx < len(m.events[m.cm.selected.Format("2006-01-02")])-1 {
+					m.dm.idx++
 				}
 			case "up", "k":
-				if m.selectedEventIdx > 0 {
-					m.selectedEventIdx--
+				if m.dm.idx > 0 {
+					m.dm.idx--
 				}
+			case "e", "E":
+				m.viewMode = EditEventView
+				m.lastViewMode = DetailsView
+			case "a", "A":
+				m.viewMode = AddEventView
+				m.lastViewMode = DetailsView
+			}
+
+		case EditEventView:
+			switch msg.String() {
+			case "q", "ctrl+c":
+				return m, tea.Quit
+			case "esc":
+				m.viewMode = m.lastViewMode
+			}
+
+		case AddEventView:
+			switch msg.String() {
+			case "q", "ctrl+c":
+				return m, tea.Quit
+			case "esc":
+				m.viewMode = m.lastViewMode
 			}
 		}
 
@@ -101,8 +126,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 	}
-	if m.selected.Month() != m.viewing.Month() || m.selected.Year() != m.viewing.Year() {
-		m.viewing = m.selected // update viewing month if selected date is not in current viewing month
+	if m.cm.selected.Month() != m.cm.viewing.Month() || m.cm.selected.Year() != m.cm.viewing.Year() {
+		m.cm.viewing = m.cm.selected // update viewing month if selected date is not in current viewing month
 	}
 
 	return m, nil
@@ -122,6 +147,10 @@ func (m model) View() string {
 		return m.calendarView()
 	case DetailsView:
 		return m.detailsView()
+	case EditEventView:
+		return m.editEventView()
+	case AddEventView:
+		return m.addEventView()
 	default:
 		return "ERROR"
 	}
