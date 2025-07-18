@@ -76,7 +76,7 @@ func (m model) calendarView() string {
 	return centerText(sb.String(), m.screenWidth)
 }
 
-func (m model) detailsView() string {
+func (m model) eventsView() string {
 	dateKey := m.cm.selected.Format("2006-01-02")
 	events := m.events[dateKey]
 	if len(events) == 0 {

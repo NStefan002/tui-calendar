@@ -74,14 +74,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					},
 				)
 			case "enter":
-				m.viewMode = DetailsView
+				m.viewMode = EventsView
 				m.lastViewMode = CalendarView
 			case "a", "A":
 				m.viewMode = AddEventView
 				m.lastViewMode = CalendarView
 			}
 
-		case DetailsView:
+		case EventsView:
 			switch msg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -97,10 +97,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			case "e", "E":
 				m.viewMode = EditEventView
-				m.lastViewMode = DetailsView
+				m.lastViewMode = EventsView
 			case "a", "A":
 				m.viewMode = AddEventView
-				m.lastViewMode = DetailsView
+				m.lastViewMode = EventsView
 			}
 
 		case EditEventView:
@@ -145,8 +145,8 @@ func (m model) View() string {
 	switch m.viewMode {
 	case CalendarView:
 		return m.calendarView()
-	case DetailsView:
-		return m.detailsView()
+	case EventsView:
+		return m.eventsView()
 	case EditEventView:
 		return m.editEventView()
 	case AddEventView:

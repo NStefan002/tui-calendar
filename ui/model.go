@@ -12,7 +12,7 @@ type CalendarViewMode int
 
 const (
 	CalendarView CalendarViewMode = iota
-	DetailsView
+	EventsView
 	AddEventView
 	EditEventView
 )
