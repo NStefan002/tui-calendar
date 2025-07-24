@@ -36,3 +36,9 @@ func formatTime(dt *calendar.EventDateTime) string {
 	}
 	return "Unknown"
 }
+
+func (m model) hasEvents(day time.Time) bool {
+	dateKey := day.Format("2006-01-02")
+	_, exists := m.events[dateKey]
+	return exists && len(m.events[dateKey]) > 0
+}

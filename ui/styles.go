@@ -19,6 +19,8 @@ var (
 
 	todayStyle = baseStyle.Background(lipgloss.Color("21")).Bold(true)
 
+	dateWithEventStyle = baseStyle.Background(lipgloss.Color("57")).Foreground(lipgloss.Color("230")).Bold(true)
+
 	eventHeaderStyle = baseStyle.Background(lipgloss.Color("33")).Bold(true)
 
 	eventStyle = baseStyle.Foreground(lipgloss.Color("252"))

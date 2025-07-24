@@ -43,6 +43,8 @@ func (m model) calendarView() string {
 			dayStr = selectedDateStyle.Render(fmt.Sprintf("%3d", day.Day()))
 		} else if isToday {
 			dayStr = todayStyle.Render(fmt.Sprintf("%3d", day.Day()))
+		} else if m.hasEvents(day) {
+			dayStr = dateWithEventStyle.Render(fmt.Sprintf("%3d", day.Day()))
 		} else {
 			dayStr = baseStyle.Render(fmt.Sprintf("%3d", day.Day()))
 		}
