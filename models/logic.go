@@ -119,16 +119,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "esc":
 				m.viewMode = m.lastViewMode
 			case "ctrl+n", "tab", "down":
-				m.am.nextField()
+				m.am.changeFocus(+1)
 			case "ctrl+p", "shift+tab", "up":
-				m.am.prevField()
-			case "enter":
+				m.am.changeFocus(-1)
+			case "ctrl+s":
 				// test print
-				fmt.Printf("Title: %s, Location: %s\n\n", m.am.title.Value(), m.am.location.Value())
+				fmt.Printf("Title: %s, Desc: %s, Location: %s\n\n", m.am.title.Value(), m.am.description.Value(), m.am.location.Value())
 			default:
-				cmds := make([]tea.Cmd, 2)
+				cmds := make([]tea.Cmd, 3)
 				m.am.title, cmds[0] = m.am.title.Update(msg)
-				m.am.location, cmds[1] = m.am.location.Update(msg)
+				m.am.description, cmds[1] = m.am.description.Update(msg)
+				m.am.location, cmds[2] = m.am.location.Update(msg)
 
 				return m, tea.Batch(cmds...)
 			}

@@ -44,6 +44,10 @@ func newAM() *addEventModel {
 	am.title.Cursor.Style = styles.ActiveTextinput
 
 	am.description.Placeholder = "Description"
+	am.description.FocusedStyle.Prompt = styles.ActiveTextinput
+	am.description.FocusedStyle.Text = styles.ActiveTextinput
+	am.description.BlurredStyle.Prompt = styles.InactiveTextinput
+	am.description.BlurredStyle.Text = styles.InactiveTextinput
 
 	am.location.Placeholder = "Location"
 	am.location.Width = 50
@@ -65,8 +69,10 @@ func (am *addEventModel) view(selectedDate time.Time, scrWidth, scrHeight int) s
 	// form fields
 	fields := []string{
 		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Title:"), am.title.View()),
+		"\n",
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Description:"), am.description.View()),
+		"\n",
 		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Location:"), am.location.View()),
-		// you can add more like description, start time, end time similarly.
 	}
 
 	form := lipgloss.JoinVertical(lipgloss.Left, fields...)
@@ -75,56 +81,48 @@ func (am *addEventModel) view(selectedDate time.Time, scrWidth, scrHeight int) s
 	sb.WriteString(utils.CenterText(box, scrWidth))
 
 	// footer
-	footer := styles.FormFooter.Render("[tab] Next field  [enter] Confirm  [esc/q] Cancel")
+	footer := styles.FormFooter.Render("[ctrl-n/tab/󰁅] Next field   [ctrl-p/shift-tab/󰁝] Previous field   [ctrl-s] Submit   [esc] Cancel")
 	sb.WriteString("\n\n" + utils.CenterText(footer, scrWidth))
 
 	return sb.String()
 }
 
-func (am *addEventModel) nextField() {
-	if am.title.Focused() {
+func (am *addEventModel) changeFocus(direction int) {
+	switch am.idx {
+	case 0:
 		am.title.Blur()
 		am.title.PromptStyle = styles.InactiveTextinput
 		am.title.TextStyle = styles.InactiveTextinput
 		am.title.Cursor.Style = styles.InactiveTextinput
-
-		am.location.Focus()
-		am.location.PromptStyle = styles.ActiveTextinput
-		am.location.TextStyle = styles.ActiveTextinput
-		am.location.Cursor.Style = styles.ActiveTextinput
-	} else if am.location.Focused() {
+	case 1:
+		am.description.Blur()
+	case 2:
+	case 3:
+	case 4:
 		am.location.Blur()
 		am.location.PromptStyle = styles.InactiveTextinput
 		am.location.TextStyle = styles.InactiveTextinput
 		am.location.Cursor.Style = styles.InactiveTextinput
-
-		am.title.Focus()
-		am.title.PromptStyle = styles.ActiveTextinput
-		am.title.TextStyle = styles.ActiveTextinput
-		am.title.Cursor.Style = styles.ActiveTextinput
+	case 5:
 	}
-}
 
-func (am *addEventModel) prevField() {
-	if am.title.Focused() {
-		am.title.Blur()
-		am.title.PromptStyle = styles.InactiveTextinput
-		am.title.TextStyle = styles.InactiveTextinput
-		am.title.Cursor.Style = styles.InactiveTextinput
+	am.idx = (am.idx + direction) % 6
 
-		am.location.Focus()
-		am.location.PromptStyle = styles.ActiveTextinput
-		am.location.TextStyle = styles.ActiveTextinput
-		am.location.Cursor.Style = styles.ActiveTextinput
-	} else if am.location.Focused() {
-		am.location.Blur()
-		am.location.PromptStyle = styles.InactiveTextinput
-		am.location.TextStyle = styles.InactiveTextinput
-		am.location.Cursor.Style = styles.InactiveTextinput
-
+	switch am.idx {
+	case 0:
 		am.title.Focus()
 		am.title.PromptStyle = styles.ActiveTextinput
 		am.title.TextStyle = styles.ActiveTextinput
 		am.title.Cursor.Style = styles.ActiveTextinput
+	case 1:
+		am.description.Focus()
+	case 2:
+	case 3:
+	case 4:
+		am.location.Focus()
+		am.location.PromptStyle = styles.ActiveTextinput
+		am.location.TextStyle = styles.ActiveTextinput
+		am.location.Cursor.Style = styles.ActiveTextinput
+	case 5:
 	}
 }

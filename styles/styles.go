@@ -77,8 +77,8 @@ var (
 
 	FieldLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("250")).
-			PaddingRight(1).
-			Width(12)
+			PaddingRight(2).
+			Width(15)
 
 	FormFooter = lipgloss.NewStyle().
 			Background(lipgloss.Color("236")).
