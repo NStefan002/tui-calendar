@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/textinput"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -12,7 +14,7 @@ type CalendarViewMode int
 
 const (
 	CalendarView CalendarViewMode = iota
-	EventsView
+	EventDetailsView
 	AddEventView
 	EditEventView
 )
@@ -23,19 +25,18 @@ type CalendarModel struct {
 	selected time.Time // selected date in the calendar
 }
 
-type DetailsModel struct {
+type EventDetailsModel struct {
 	idx int // index of the currently selected event in the list
 }
 
 type AddEventModel struct {
-	title       string    // title of the new event
-	description string    // description of the new event
-	startTime   time.Time // start time of the new event
-	endTime     time.Time // end time of the new event
-	location    string    // location of the new event
-	allDay      bool      // whether the event is an all-day event
-
-	idx int // index of the text input field being edited
+	title       textinput.Model // title of the new event
+	description textarea.Model  // description of the new event
+	startTime   time.Time       // start time of the new event
+	endTime     time.Time       // end time of the new event
+	location    textinput.Model // location of the new event
+	allDay      bool            // whether the event is an all-day event
+	idx         int             // index of the field being edited
 }
 
 type EditEventModel struct {
@@ -51,10 +52,10 @@ type EditEventModel struct {
 }
 
 type model struct {
-	cm CalendarModel  // submodel containing calendar data
-	dm DetailsModel   // submodel for viewing event details
-	am AddEventModel  // submodel for adding new events
-	em EditEventModel // submodel for editing existing events
+	cm CalendarModel     // submodel containing calendar data
+	dm EventDetailsModel // submodel for viewing event details
+	am AddEventModel     // submodel for adding new events
+	em EditEventModel    // submodel for editing existing events
 
 	calendarService *calendar.Service            // Google Calendar service for API calls
 	events          map[string][]*calendar.Event // key: YYYY-MM-DD, value: list of events for that day
@@ -74,21 +75,22 @@ type model struct {
 func CreateModel(srv *calendar.Service) model {
 	s := spinner.New()
 	s.Spinner = spinner.Line
-	return model{
+
+	m := model{
 		cm: CalendarModel{
 			now:      time.Now(),
 			viewing:  time.Now(),
 			selected: time.Now(),
 		},
-		dm: DetailsModel{
+		dm: EventDetailsModel{
 			idx: 0,
 		},
 		am: AddEventModel{
-			title:       "",
-			description: "",
+			title:       textinput.New(),
+			description: textarea.New(),
 			startTime:   time.Now(),
 			endTime:     time.Now().Add(time.Hour),
-			location:    "",
+			location:    textinput.New(),
 			allDay:      false,
 			idx:         0,
 		},
@@ -112,4 +114,23 @@ func CreateModel(srv *calendar.Service) model {
 		errMessage:      "",
 		spinner:         s,
 	}
+
+	m.am.title.Placeholder = "Title"
+	m.am.title.Width = 50
+	m.am.title.CharLimit = 50
+	m.am.title.Focus()
+	m.am.title.PromptStyle = activeTextinputStyle
+	m.am.title.TextStyle = activeTextinputStyle
+	m.am.title.Cursor.Style = activeTextinputStyle
+
+	m.am.description.Placeholder = "Description"
+
+	m.am.location.Placeholder = "Location"
+	m.am.location.Width = 50
+	m.am.location.CharLimit = 100
+	m.am.location.PromptStyle = inactiveTextinputStyle
+	m.am.location.TextStyle = inactiveTextinputStyle
+	m.am.location.Cursor.Style = inactiveTextinputStyle
+
+	return m
 }

@@ -42,3 +42,51 @@ func (m model) hasEvents(day time.Time) bool {
 	_, exists := m.events[dateKey]
 	return exists && len(m.events[dateKey]) > 0
 }
+
+func (am *AddEventModel) nextField() {
+	if am.title.Focused() {
+		am.title.Blur()
+		am.title.PromptStyle = inactiveTextinputStyle
+		am.title.TextStyle = inactiveTextinputStyle
+		am.title.Cursor.Style = inactiveTextinputStyle
+
+		am.location.Focus()
+		am.location.PromptStyle = activeTextinputStyle
+		am.location.TextStyle = activeTextinputStyle
+		am.location.Cursor.Style = activeTextinputStyle
+	} else if am.location.Focused() {
+		am.location.Blur()
+		am.location.PromptStyle = inactiveTextinputStyle
+		am.location.TextStyle = inactiveTextinputStyle
+		am.location.Cursor.Style = inactiveTextinputStyle
+
+		am.title.Focus()
+		am.title.PromptStyle = activeTextinputStyle
+		am.title.TextStyle = activeTextinputStyle
+		am.title.Cursor.Style = activeTextinputStyle
+	}
+}
+
+func (am *AddEventModel) prevField() {
+	if am.title.Focused() {
+		am.title.Blur()
+		am.title.PromptStyle = inactiveTextinputStyle
+		am.title.TextStyle = inactiveTextinputStyle
+		am.title.Cursor.Style = inactiveTextinputStyle
+
+		am.location.Focus()
+		am.location.PromptStyle = activeTextinputStyle
+		am.location.TextStyle = activeTextinputStyle
+		am.location.Cursor.Style = activeTextinputStyle
+	} else if am.location.Focused() {
+		am.location.Blur()
+		am.location.PromptStyle = inactiveTextinputStyle
+		am.location.TextStyle = inactiveTextinputStyle
+		am.location.Cursor.Style = inactiveTextinputStyle
+
+		am.title.Focus()
+		am.title.PromptStyle = activeTextinputStyle
+		am.title.TextStyle = activeTextinputStyle
+		am.title.Cursor.Style = activeTextinputStyle
+	}
+}

@@ -68,4 +68,39 @@ var (
 				Foreground(lipgloss.Color("#888888")).
 				Background(lipgloss.Color("#1E1E1E")).
 				Padding(0, 1)
+
+	boxStyle = lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			Padding(1, 2).
+			Margin(1, 0).
+			BorderForeground(lipgloss.Color("240"))
+
+	fieldLabelStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("250")).
+			PaddingRight(1).
+			Width(12)
+
+	formFooterStyle = lipgloss.NewStyle().
+			Background(lipgloss.Color("236")).
+			Foreground(lipgloss.Color("250")).
+			Padding(0, 1).
+			Align(lipgloss.Center)
+
+	detailTitleStyle = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(lipgloss.Color("#FFFFFF")).
+				Background(lipgloss.Color("#005F87")).
+				Padding(0, 1)
+
+	timeLabelStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#AAAAAA")).
+			Bold(true)
+
+	timeValueStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFFFFF")).
+			PaddingLeft(1)
+
+	descriptionStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#C0C0C0")).
+				PaddingTop(1)
 )

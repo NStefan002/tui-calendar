@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	// "github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -25,7 +24,7 @@ func (m model) calendarView() string {
 	firstDay := time.Date(m.cm.viewing.Year(), m.cm.viewing.Month(), 1, 0, 0, 0, 0, m.cm.viewing.Location())
 	lastDay := firstDay.AddDate(0, 1, -1)
 
-	// Align calendar to start on Monday (make Sunday = 7)
+	// align calendar to start on Monday (make Sunday = 7)
 	weekday := int(firstDay.Weekday())
 	if weekday == 0 {
 		weekday = 7
@@ -87,49 +86,68 @@ func (m model) eventsView() string {
 
 	selected := events[m.dm.idx]
 
-	// left column: full details
-	var details strings.Builder
-	details.WriteString(eventStyle.Render(fmt.Sprintf("Title: %s\n", selected.Summary)))
-	if selected.Location != "" {
-		details.WriteString(eventStyle.Render(fmt.Sprintf("Location: %s\n", selected.Location)))
-	}
-	if selected.Start != nil {
-		details.WriteString(eventStyle.Render(fmt.Sprintf("\nStart: %s\n", formatTime(selected.Start))))
-	}
-	if selected.End != nil {
-		details.WriteString(eventStyle.Render(fmt.Sprintf("\nEnd:   %s\n", formatTime(selected.End))))
-	}
-	if selected.Description != "" {
-		details.WriteString(eventStyle.Render("\nDescription:\n" + selected.Description + "\n"))
-	}
-
-	leftCol := eventDetailsStyle.Render(details.String())
-
-	// right column: list of events
+	// left column: event titles
 	var list strings.Builder
 	for i, event := range events {
-		timeStr := "All-day"
-		if event.Start != nil && event.Start.DateTime != "" {
-			t, err := time.Parse(time.RFC3339, event.Start.DateTime)
-			if err == nil {
-				timeStr = t.Format("15:04")
-			}
+		title := event.Summary
+		if title == "" {
+			title = "[No Title]"
 		}
-		line := fmt.Sprintf("%s  %s", timeStr, event.Summary)
 		if i == m.dm.idx {
-			list.WriteString(eventListSelectedStyle.Render(line) + "\n")
+			list.WriteString(eventListSelectedStyle.Render(title) + "\n")
 		} else {
-			list.WriteString(eventListStyle.Render(line) + "\n")
+			list.WriteString(eventListStyle.Render(title) + "\n")
 		}
 	}
-	rightCol := list.String()
+	leftCol := boxStyle.Width(30).Render(list.String())
 
-	// compose side by side
-	combined := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
+	// right column: selected event details
+	var right strings.Builder
 
-	// footer navigation
-	footer := "\n[j/k] Move  [escq] Back"
-	return centerText(combined+footer, m.screenWidth)
+	// title
+	eventTitle := selected.Summary
+	if eventTitle == "" {
+		eventTitle = "[No Title]"
+	}
+	right.WriteString(centerText(detailTitleStyle.Render(eventTitle), 50) + "\n\n")
+
+	// times
+	var startStr, endStr string
+	if selected.Start != nil && selected.Start.DateTime != "" {
+		startTime, err := time.Parse(time.RFC3339, selected.Start.DateTime)
+		if err == nil {
+			startStr = timeLabelStyle.Render("Start: ") + timeValueStyle.Render(startTime.Format("Mon, Jan 2 — 15:04"))
+		}
+	}
+	if selected.End != nil && selected.End.DateTime != "" {
+		endTime, err := time.Parse(time.RFC3339, selected.End.DateTime)
+		if err == nil {
+			endStr = timeLabelStyle.Render("End:   ") + timeValueStyle.Render(endTime.Format("Mon, Jan 2 — 15:04"))
+		}
+	}
+	if startStr != "" {
+		right.WriteString(startStr + "\n")
+	}
+	if endStr != "" {
+		right.WriteString(endStr + "\n")
+	}
+
+	// description
+	desc := strings.TrimSpace(selected.Description)
+	if desc == "" {
+		desc = "[No description]"
+	}
+	right.WriteString("\n" + descriptionStyle.Render(desc))
+
+	rightCol := boxStyle.Width(50).Render(right.String())
+
+	// side-by-side layout
+	main := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
+
+	// footer
+	footer := formFooterStyle.Render("[j/k] Navigate  [q/esc] Back")
+
+	return centerText(main, m.screenWidth) + "\n\n" + centerText(footer, m.screenWidth)
 }
 
 func (m model) editEventView() string {
@@ -137,5 +155,27 @@ func (m model) editEventView() string {
 }
 
 func (m model) addEventView() string {
-	return "ADD EVENT VIEW (not implemented yet)"
+	var sb strings.Builder
+
+	// header
+	header := headerStyle.Render(fmt.Sprintf("➕ Add Event for %s", m.cm.selected.Format("January 2, 2006")))
+	sb.WriteString(centerText(header, m.screenWidth) + "\n\n")
+
+	// form fields
+	fields := []string{
+		lipgloss.JoinHorizontal(lipgloss.Top, fieldLabelStyle.Render("Title:"), m.am.title.View()),
+		lipgloss.JoinHorizontal(lipgloss.Top, fieldLabelStyle.Render("Location:"), m.am.location.View()),
+		// you can add more like description, start time, end time similarly.
+	}
+
+	form := lipgloss.JoinVertical(lipgloss.Left, fields...)
+	box := boxStyle.Render(form)
+
+	sb.WriteString(centerText(box, m.screenWidth))
+
+	// footer
+	footer := formFooterStyle.Render("[tab] Next field  [enter] Confirm  [esc/q] Cancel")
+	sb.WriteString("\n\n" + centerText(footer, m.screenWidth))
+
+	return sb.String()
 }

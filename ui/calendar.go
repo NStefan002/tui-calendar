@@ -74,14 +74,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					},
 				)
 			case "enter":
-				m.viewMode = EventsView
+				m.viewMode = EventDetailsView
 				m.lastViewMode = CalendarView
 			case "a", "A":
 				m.viewMode = AddEventView
 				m.lastViewMode = CalendarView
 			}
 
-		case EventsView:
+		case EventDetailsView:
 			switch msg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -97,10 +97,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			case "e", "E":
 				m.viewMode = EditEventView
-				m.lastViewMode = EventsView
+				m.lastViewMode = EventDetailsView
 			case "a", "A":
 				m.viewMode = AddEventView
-				m.lastViewMode = EventsView
+				m.lastViewMode = EventDetailsView
 			}
 
 		case EditEventView:
@@ -117,6 +117,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			case "esc":
 				m.viewMode = m.lastViewMode
+			case "ctrl+n", "tab", "down":
+				m.am.nextField()
+			case "ctrl+p", "shift+tab", "up":
+				m.am.prevField()
+			case "enter":
+				// test print
+				fmt.Printf("Title: %s, Location: %s\n\n", m.am.title.Value(), m.am.location.Value())
+			default:
+				cmds := make([]tea.Cmd, 2)
+				m.am.title, cmds[0] = m.am.title.Update(msg)
+				m.am.location, cmds[1] = m.am.location.Update(msg)
+
+				return m, tea.Batch(cmds...)
 			}
 		}
 
@@ -145,7 +158,7 @@ func (m model) View() string {
 	switch m.viewMode {
 	case CalendarView:
 		return m.calendarView()
-	case EventsView:
+	case EventDetailsView:
 		return m.eventsView()
 	case EditEventView:
 		return m.editEventView()
