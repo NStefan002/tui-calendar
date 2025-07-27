@@ -1,9 +1,10 @@
-package ui
+package models
 
 import (
 	"context"
 	"fmt"
 	"time"
+	"tui-calendar/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/api/calendar/v3"
@@ -45,7 +46,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch m.viewMode {
-		case CalendarView:
+		case calendarView:
 			switch msg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -74,14 +75,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					},
 				)
 			case "enter":
-				m.viewMode = EventDetailsView
-				m.lastViewMode = CalendarView
+				m.viewMode = eventDetailsView
+				m.lastViewMode = calendarView
 			case "a", "A":
-				m.viewMode = AddEventView
-				m.lastViewMode = CalendarView
+				m.viewMode = addEventView
+				m.lastViewMode = calendarView
 			}
 
-		case EventDetailsView:
+		case eventDetailsView:
 			switch msg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -96,14 +97,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.dm.idx--
 				}
 			case "e", "E":
-				m.viewMode = EditEventView
-				m.lastViewMode = EventDetailsView
+				m.viewMode = editEventView
+				m.lastViewMode = eventDetailsView
 			case "a", "A":
-				m.viewMode = AddEventView
-				m.lastViewMode = EventDetailsView
+				m.viewMode = addEventView
+				m.lastViewMode = eventDetailsView
 			}
 
-		case EditEventView:
+		case editEventView:
 			switch msg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -111,7 +112,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewMode = m.lastViewMode
 			}
 
-		case AddEventView:
+		case addEventView:
 			switch msg.String() {
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -148,7 +149,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.loading {
-		return centerText(m.spinner.View()+" Loading calendar events...", m.screenWidth)
+		return utils.CenterText(m.spinner.View()+" Loading calendar events...", m.screenWidth)
 	}
 
 	if len(m.errMessage) > 0 {
@@ -156,14 +157,14 @@ func (m model) View() string {
 	}
 
 	switch m.viewMode {
-	case CalendarView:
-		return m.calendarView()
-	case EventDetailsView:
-		return m.eventsView()
-	case EditEventView:
-		return m.editEventView()
-	case AddEventView:
-		return m.addEventView()
+	case calendarView:
+		return m.cm.view(m.events, m.screenWidth, m.screenHeight)
+	case eventDetailsView:
+		return m.dm.view(m.cm.selected, m.events, m.screenWidth, m.screenHeight)
+	case editEventView:
+		return m.em.view()
+	case addEventView:
+		return m.am.view(m.cm.selected, m.screenWidth, m.screenHeight)
 	default:
 		return "ERROR"
 	}

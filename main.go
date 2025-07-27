@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"tui-calendar/google"
-	"tui-calendar/ui"
+	"tui-calendar/models"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/joho/godotenv"
@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("Failed to get calendar client: %v", err)
 	}
 
-	p := tea.NewProgram(ui.CreateModel(srv))
+	p := tea.NewProgram(models.CreateModel(srv))
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}

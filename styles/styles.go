@@ -1,4 +1,4 @@
-package ui
+package styles
 
 import (
 	"github.com/charmbracelet/lipgloss"
@@ -7,100 +7,100 @@ import (
 // styles for the calendar UI
 
 var (
-	baseStyle = lipgloss.NewStyle().
+	Base = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#DADADA")).
 			Background(lipgloss.Color("#1E1E1E")).
 			Padding(0, 1)
 
-	headerStyle = lipgloss.NewStyle().
+	Header = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFFFF")).
 			Background(lipgloss.Color("#3A3A3A")).
 			Padding(1, 2).
 			Bold(true).
 			Align(lipgloss.Center)
 
-	selectedDateStyle = baseStyle.
+	SelectedDate = Base.
 				Foreground(lipgloss.Color("#1E1E1E")).
 				Background(lipgloss.Color("#FFD700")).
 				Bold(true)
 
-	todayStyle = baseStyle.
+	Today = Base.
 			Background(lipgloss.Color("#005F87")).
 			Bold(true)
 
-	dateWithEventStyle = baseStyle.
+	DateWithEvent = Base.
 				Foreground(lipgloss.Color("#F0F0F0")).
 				Background(lipgloss.Color("#444444")).
 				Bold(true)
 
-	eventHeaderStyle = lipgloss.NewStyle().
+	EventHeader = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FFFFFF")).
 				Background(lipgloss.Color("#005F5F")).
 				Bold(true).
 				Padding(0, 1)
 
-	eventStyle = baseStyle.
+	Event = Base.
 			Foreground(lipgloss.Color("#C0C0C0"))
 
-	eventDetailsStyle = lipgloss.NewStyle().
+	EventDetails = lipgloss.NewStyle().
 				Padding(1, 2).
 				Border(lipgloss.RoundedBorder()).
 				BorderForeground(lipgloss.Color("#5F5F5F")).
 				Width(50)
 
-	eventListStyle = baseStyle.
+	EventList = Base.
 			Padding(0, 1).
 			Border(lipgloss.NormalBorder()).
 			BorderForeground(lipgloss.Color("#3A3A3A"))
 
-	eventListSelectedStyle = eventListStyle.
+	EventListSelected = EventList.
 				Background(lipgloss.Color("#5F00AF")).
 				Foreground(lipgloss.Color("#FFFFFF")).
 				Bold(true)
 
-	activeTextinputStyle = lipgloss.NewStyle().
+	ActiveTextinput = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FFFFFF")).
 				Background(lipgloss.Color("#005F87")).
 				Padding(0, 1).
 				Bold(true)
 
-	inactiveTextinputStyle = lipgloss.NewStyle().
+	InactiveTextinput = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#888888")).
 				Background(lipgloss.Color("#1E1E1E")).
 				Padding(0, 1)
 
-	boxStyle = lipgloss.NewStyle().
+	Box = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			Padding(1, 2).
 			Margin(1, 0).
 			BorderForeground(lipgloss.Color("240"))
 
-	fieldLabelStyle = lipgloss.NewStyle().
+	FieldLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("250")).
 			PaddingRight(1).
 			Width(12)
 
-	formFooterStyle = lipgloss.NewStyle().
+	FormFooter = lipgloss.NewStyle().
 			Background(lipgloss.Color("236")).
 			Foreground(lipgloss.Color("250")).
 			Padding(0, 1).
 			Align(lipgloss.Center)
 
-	detailTitleStyle = lipgloss.NewStyle().
+	DetailTitle = lipgloss.NewStyle().
 				Bold(true).
 				Foreground(lipgloss.Color("#FFFFFF")).
 				Background(lipgloss.Color("#005F87")).
 				Padding(0, 1)
 
-	timeLabelStyle = lipgloss.NewStyle().
+	TimeLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#AAAAAA")).
 			Bold(true)
 
-	timeValueStyle = lipgloss.NewStyle().
+	TimeValue = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFFFF")).
 			PaddingLeft(1)
 
-	descriptionStyle = lipgloss.NewStyle().
+	Description = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#C0C0C0")).
 				PaddingTop(1)
 )
