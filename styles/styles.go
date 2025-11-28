@@ -8,45 +8,45 @@ import (
 
 var (
 	Base = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#DADADA")).
-			Background(lipgloss.Color("#1E1E1E")).
-			Padding(0, 1)
+		Foreground(lipgloss.Color("#DADADA")).
+		Background(lipgloss.Color("#1E1E1E")).
+		Padding(0, 1)
 
 	Header = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFFFF")).
-			Background(lipgloss.Color("#3A3A3A")).
-			Padding(1, 2).
-			Bold(true).
-			Align(lipgloss.Center)
+		Foreground(lipgloss.Color("#FFFFFF")).
+		Background(lipgloss.Color("#3A3A3A")).
+		Padding(1, 2).
+		Bold(true).
+		Align(lipgloss.Center)
 
 	SelectedDate = Base.
-				Foreground(lipgloss.Color("#1E1E1E")).
-				Background(lipgloss.Color("#FFD700")).
-				Bold(true)
-
-	Today = Base.
-			Background(lipgloss.Color("#005F87")).
+			Foreground(lipgloss.Color("#1E1E1E")).
+			Background(lipgloss.Color("#FFD700")).
 			Bold(true)
 
+	Today = Base.
+		Background(lipgloss.Color("#005F87")).
+		Bold(true)
+
 	DateWithEvent = Base.
-				Foreground(lipgloss.Color("#F0F0F0")).
-				Background(lipgloss.Color("#444444")).
-				Bold(true)
+			Foreground(lipgloss.Color("#F0F0F0")).
+			Background(lipgloss.Color("#444444")).
+			Bold(true)
 
 	EventHeader = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#FFFFFF")).
-				Background(lipgloss.Color("#005F5F")).
-				Bold(true).
-				Padding(0, 1)
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Background(lipgloss.Color("#005F5F")).
+			Bold(true).
+			Padding(0, 1)
 
 	Event = Base.
-			Foreground(lipgloss.Color("#C0C0C0"))
+		Foreground(lipgloss.Color("#C0C0C0"))
 
 	EventDetails = lipgloss.NewStyle().
-				Padding(1, 2).
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color("#5F5F5F")).
-				Width(50)
+			Padding(1, 2).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("#5F5F5F")).
+			Width(50)
 
 	EventList = Base.
 			Padding(0, 1).
@@ -59,10 +59,10 @@ var (
 				Bold(true)
 
 	ActiveTextinput = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#FFFFFF")).
-				Background(lipgloss.Color("#005F87")).
-				Padding(0, 1).
-				Bold(true)
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Background(lipgloss.Color("#005F87")).
+			Padding(0, 1).
+			Bold(true)
 
 	InactiveTextinput = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#888888")).
@@ -70,10 +70,10 @@ var (
 				Padding(0, 1)
 
 	Box = lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder()).
-			Padding(1, 2).
-			Margin(1, 0).
-			BorderForeground(lipgloss.Color("240"))
+		Border(lipgloss.NormalBorder()).
+		Padding(1, 2).
+		Margin(1, 0).
+		BorderForeground(lipgloss.Color("240"))
 
 	FieldLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("250")).
@@ -87,10 +87,10 @@ var (
 			Align(lipgloss.Center)
 
 	DetailTitle = lipgloss.NewStyle().
-				Bold(true).
-				Foreground(lipgloss.Color("#FFFFFF")).
-				Background(lipgloss.Color("#005F87")).
-				Padding(0, 1)
+			Bold(true).
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Background(lipgloss.Color("#005F87")).
+			Padding(0, 1)
 
 	TimeLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#AAAAAA")).
@@ -101,6 +101,6 @@ var (
 			PaddingLeft(1)
 
 	Description = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#C0C0C0")).
-				PaddingTop(1)
+			Foreground(lipgloss.Color("#C0C0C0")).
+			PaddingTop(1)
 )

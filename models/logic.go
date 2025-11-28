@@ -172,8 +172,8 @@ func (m model) View() string {
 }
 
 func fetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calendar.Event, error) {
-	start := time.Date(viewing.Year() - 30, 0, 0, 0, 0, 0, 0, viewing.Location())
-	end := time.Date(viewing.Year() + 30, 0, 0, 0, 0, 0, 0, viewing.Location())
+	start := time.Date(viewing.Year()-30, 0, 0, 0, 0, 0, 0, viewing.Location())
+	end := time.Date(viewing.Year()+30, 0, 0, 0, 0, 0, 0, viewing.Location())
 
 	events := make(map[string][]*calendar.Event)
 
