@@ -88,7 +88,7 @@ func (dm *eventDetailsModel) view(selectedDate time.Time, events map[string][]*c
 	main := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
 
 	// footer
-	footer := styles.FormFooter.Render("[j/k] Navigate  [q/esc] Back")
+	footer := styles.FormFooter.Render("[j/k] Navigate  [esc] Back")
 
 	return utils.CenterText(main, scrWidth) + "\n\n" + utils.CenterText(footer, scrWidth)
 }
