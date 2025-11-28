@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
 	"google.golang.org/api/calendar/v3"
 )
@@ -20,6 +21,14 @@ type model struct {
 	dm *eventDetailsModel // submodel for viewing event details
 	am *addEventModel     // submodel for adding new events
 	em *editEventModel    // submodel for editing existing events
+
+	calendarViewKeys     calendarViewKeyMap     // key bindings for calendar view
+	eventDetailsViewKeys eventDetailsViewKeyMap // key bindings for event details view
+	addEventViewKeys     addEventViewKeyMap     // key bindings for add event view
+	editEventViewKeys    editEventViewKeyMap    // key bindings for edit event view
+
+	help     help.Model // help view model
+	showHelp bool       // whether to show help view
 
 	calendarService *calendar.Service            // Google Calendar service for API calls
 	events          map[string][]*calendar.Event // key: YYYY-MM-DD, value: list of events for that day
@@ -41,19 +50,25 @@ func CreateModel(srv *calendar.Service) model {
 	s.Spinner = spinner.Line
 
 	m := model{
-		cm:              newCM(),
-		dm:              newDM(),
-		am:              newAM(),
-		em:              newEM(),
-		calendarService: srv,
-		events:          make(map[string][]*calendar.Event),
-		viewMode:        calendarView,
-		lastViewMode:    calendarView,
-		screenWidth:     80,
-		screenHeight:    24,
-		loading:         true,
-		errMessage:      "",
-		spinner:         s,
+		cm:                   newCM(),
+		dm:                   newDM(),
+		am:                   newAM(),
+		em:                   newEM(),
+		calendarViewKeys:     calendarViewKeys,
+		eventDetailsViewKeys: eventDetailsViewKeys,
+		addEventViewKeys:     addEventViewKeys,
+		editEventViewKeys:    editEventViewKeys,
+		help:                 help.New(),
+		showHelp:             false,
+		calendarService:      srv,
+		events:               make(map[string][]*calendar.Event),
+		viewMode:             calendarView,
+		lastViewMode:         calendarView,
+		screenWidth:          80,
+		screenHeight:         24,
+		loading:              true,
+		errMessage:           "",
+		spinner:              s,
 	}
 
 	return m

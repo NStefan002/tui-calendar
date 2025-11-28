@@ -6,6 +6,7 @@ import (
 	"time"
 	"tui-calendar/utils"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/api/calendar/v3"
 )
@@ -47,22 +48,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch m.viewMode {
 		case calendarView:
-			switch msg.String() {
-			case "q", "ctrl+c":
+			switch {
+			case key.Matches(msg, m.calendarViewKeys.Quit):
 				return m, tea.Quit
-			case "left", "h":
+			case key.Matches(msg, m.calendarViewKeys.PrevDay):
 				m.cm.selected = m.cm.selected.AddDate(0, 0, -1) // go to previous day
-			case "right", "l":
+			case key.Matches(msg, m.calendarViewKeys.NextDay):
 				m.cm.selected = m.cm.selected.AddDate(0, 0, 1) // go to next day
-			case "up", "k":
+			case key.Matches(msg, m.calendarViewKeys.PrevWeek):
 				m.cm.selected = m.cm.selected.AddDate(0, 0, -7) // go to previous week
-			case "down", "j":
+			case key.Matches(msg, m.calendarViewKeys.NextWeek):
 				m.cm.selected = m.cm.selected.AddDate(0, 0, 7) // go to next week
-			case "pageup", "pgup", "ctrl+u":
+			case key.Matches(msg, m.calendarViewKeys.PrevMonth):
 				m.cm.selected = m.cm.selected.AddDate(0, -1, 0) // go to previous month
-			case "pagedown", "pgdown", "ctrl+d":
+			case key.Matches(msg, m.calendarViewKeys.NextMonth):
 				m.cm.selected = m.cm.selected.AddDate(0, 1, 0) // go to next month
-			case "r":
+			case key.Matches(msg, m.calendarViewKeys.Refresh):
 				m.loading = true
 				return m, tea.Batch(
 					m.spinner.Tick, // start spinner
@@ -74,55 +75,69 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						return eventsMsg(events)
 					},
 				)
-			case "enter":
+			case key.Matches(msg, m.calendarViewKeys.Help):
+				m.showHelp = !m.showHelp
+			case key.Matches(msg, m.calendarViewKeys.ViewEvent):
 				m.viewMode = eventDetailsView
 				m.lastViewMode = calendarView
-			case "a", "A":
+				m.showHelp = false
+			case key.Matches(msg, m.calendarViewKeys.AddEvent):
 				m.viewMode = addEventView
 				m.lastViewMode = calendarView
+				m.showHelp = false
 			}
 
 		case eventDetailsView:
-			switch msg.String() {
-			case "q", "ctrl+c":
+			switch {
+			case key.Matches(msg, m.eventDetailsViewKeys.Quit):
 				return m, tea.Quit
-			case "esc":
+			case key.Matches(msg, m.eventDetailsViewKeys.Back):
 				m.viewMode = m.lastViewMode
-			case "down", "j":
+			case key.Matches(msg, m.eventDetailsViewKeys.Help):
+				m.showHelp = !m.showHelp
+			case key.Matches(msg, m.eventDetailsViewKeys.ScrollDown):
 				if len(m.events) > 0 && m.dm.idx < len(m.events[m.cm.selected.Format("2006-01-02")])-1 {
 					m.dm.idx++
 				}
-			case "up", "k":
+			case key.Matches(msg, m.eventDetailsViewKeys.ScrollUp):
 				if m.dm.idx > 0 {
 					m.dm.idx--
 				}
-			case "e", "E":
+			case key.Matches(msg, m.eventDetailsViewKeys.EditEvent):
 				m.viewMode = editEventView
 				m.lastViewMode = eventDetailsView
-			case "a", "A":
+				m.showHelp = false
+			case key.Matches(msg, m.eventDetailsViewKeys.AddEvent):
 				m.viewMode = addEventView
 				m.lastViewMode = eventDetailsView
+				m.showHelp = false
 			}
 
 		case editEventView:
-			switch msg.String() {
-			case "q", "ctrl+c":
+			switch {
+			case key.Matches(msg, m.editEventViewKeys.Quit):
 				return m, tea.Quit
-			case "esc":
+			case key.Matches(msg, m.editEventViewKeys.Back):
 				m.viewMode = m.lastViewMode
+				m.showHelp = false
+			case key.Matches(msg, m.editEventViewKeys.Help):
+				m.showHelp = !m.showHelp
 			}
 
 		case addEventView:
-			switch msg.String() {
-			case "q", "ctrl+c":
+			switch {
+			case key.Matches(msg, m.addEventViewKeys.Quit):
 				return m, tea.Quit
-			case "esc":
+			case key.Matches(msg, m.addEventViewKeys.Back):
 				m.viewMode = m.lastViewMode
-			case "ctrl+n", "tab", "down":
+				m.showHelp = false
+			case key.Matches(msg, m.addEventViewKeys.Help):
+				m.showHelp = !m.showHelp
+			case key.Matches(msg, m.addEventViewKeys.Next):
 				m.am.changeFocus(+1)
-			case "ctrl+p", "shift+tab", "up":
+			case key.Matches(msg, m.addEventViewKeys.Previous):
 				m.am.changeFocus(-1)
-			case "ctrl+s":
+			case key.Matches(msg, m.addEventViewKeys.Submit):
 				// test print
 				fmt.Printf("Title: %s, Desc: %s, Location: %s\n\n", m.am.title.Value(), m.am.description.Value(), m.am.location.Value())
 			default:
