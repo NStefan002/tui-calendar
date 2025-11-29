@@ -174,13 +174,13 @@ func (m model) View() string {
 
 	switch m.viewMode {
 	case calendarView:
-		return m.cm.view(m.events, m.screenWidth, m.screenHeight)
+		return m.cm.view(&m)
 	case eventDetailsView:
-		return m.dm.view(m.cm.selected, m.events, m.screenWidth, m.screenHeight)
+		return m.dm.view(&m)
 	case editEventView:
 		return m.em.view()
 	case addEventView:
-		return m.am.view(m.cm.selected, m.screenWidth, m.screenHeight)
+		return m.am.view(&m)
 	default:
 		return "ERROR"
 	}

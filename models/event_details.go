@@ -7,7 +7,6 @@ import (
 	"tui-calendar/utils"
 
 	"github.com/charmbracelet/lipgloss"
-	"google.golang.org/api/calendar/v3"
 )
 
 type eventDetailsModel struct {
@@ -20,11 +19,11 @@ func newDM() *eventDetailsModel {
 	}
 }
 
-func (dm *eventDetailsModel) view(selectedDate time.Time, events map[string][]*calendar.Event, scrWidth, scrHeight int) string {
-	dateKey := selectedDate.Format("2006-01-02")
-	selectedEvents := events[dateKey]
+func (dm *eventDetailsModel) view(m *model) string {
+	dateKey := m.cm.selected.Format("2006-01-02")
+	selectedEvents := m.events[dateKey]
 	if len(selectedEvents) == 0 {
-		return utils.CenterText("No events for this day.", scrWidth)
+		return utils.CenterText("No events for this day.", m.screenWidth)
 	}
 
 	selected := selectedEvents[dm.idx]
@@ -87,8 +86,7 @@ func (dm *eventDetailsModel) view(selectedDate time.Time, events map[string][]*c
 	// side-by-side layout
 	main := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
 
-	// footer
-	footer := styles.FormFooter.Render("[j/k] Navigate  [esc] Back")
+	helpText := m.help.View(m.eventDetailsViewKeys)
 
-	return utils.CenterText(main, scrWidth) + "\n\n" + utils.CenterText(footer, scrWidth)
+	return utils.CenterText(main, m.screenWidth) + "\n\n" + utils.CenterText(helpText, m.screenWidth)
 }

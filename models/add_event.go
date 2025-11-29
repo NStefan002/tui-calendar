@@ -59,12 +59,12 @@ func newAM() *addEventModel {
 	return am
 }
 
-func (am *addEventModel) view(selectedDate time.Time, scrWidth, scrHeight int) string {
+func (am *addEventModel) view(m *model) string {
 	var sb strings.Builder
 
 	// header
-	header := styles.Header.Render(fmt.Sprintf("➕ Add Event for %s", selectedDate.Format("January 2, 2006")))
-	sb.WriteString(utils.CenterText(header, scrWidth) + "\n\n")
+	header := styles.Header.Render(fmt.Sprintf("➕ Add Event for %s", m.cm.selected.Format("January 2, 2006")))
+	sb.WriteString(utils.CenterText(header, m.screenWidth) + "\n\n")
 
 	// form fields
 	fields := []string{
@@ -78,11 +78,10 @@ func (am *addEventModel) view(selectedDate time.Time, scrWidth, scrHeight int) s
 	form := lipgloss.JoinVertical(lipgloss.Left, fields...)
 	box := styles.Box.Render(form)
 
-	sb.WriteString(utils.CenterText(box, scrWidth))
+	sb.WriteString(utils.CenterText(box, m.screenWidth))
 
-	// footer
-	footer := styles.FormFooter.Render("[ctrl-n/tab/󰁅] Next field   [ctrl-p/shift-tab/󰁝] Previous field   [ctrl-s] Submit   [esc] Cancel")
-	sb.WriteString("\n\n" + utils.CenterText(footer, scrWidth))
+	helpText := m.help.View(m.addEventViewKeys)
+	sb.WriteString("\n\n" + utils.CenterText(helpText, m.screenWidth))
 
 	return sb.String()
 }

@@ -8,7 +8,6 @@ import (
 	"tui-calendar/utils"
 
 	"github.com/charmbracelet/lipgloss"
-	"google.golang.org/api/calendar/v3"
 )
 
 type calendarModel struct {
@@ -25,7 +24,7 @@ func newCM() *calendarModel {
 	}
 }
 
-func (cm *calendarModel) view(events map[string][]*calendar.Event, scrWidth, scrHeight int) string {
+func (cm *calendarModel) view(m *model) string {
 	var sb strings.Builder
 
 	// header (month and year)
@@ -59,7 +58,7 @@ func (cm *calendarModel) view(events map[string][]*calendar.Event, scrWidth, scr
 			dayStr = styles.SelectedDate.Render(fmt.Sprintf("%3d", day.Day()))
 		} else if isToday {
 			dayStr = styles.Today.Render(fmt.Sprintf("%3d", day.Day()))
-		} else if utils.HasEvents(events, day) {
+		} else if utils.HasEvents(m.events, day) {
 			dayStr = styles.DateWithEvent.Render(fmt.Sprintf("%3d", day.Day()))
 		} else {
 			dayStr = styles.Base.Render(fmt.Sprintf("%3d", day.Day()))
@@ -75,7 +74,7 @@ func (cm *calendarModel) view(events map[string][]*calendar.Event, scrWidth, scr
 
 	// display events (if any) for the selected date
 	dateKey := cm.selected.Format("2006-01-02")
-	if events, ok := events[dateKey]; ok && len(events) > 0 {
+	if events, ok := m.events[dateKey]; ok && len(events) > 0 {
 		eventsHeader := styles.EventHeader.Render("Events for " + cm.selected.Format("January 2, 2006"))
 		sb.WriteString("\n\n\n" + eventsHeader + "\n")
 		for _, event := range events {
@@ -91,5 +90,9 @@ func (cm *calendarModel) view(events map[string][]*calendar.Event, scrWidth, scr
 	}
 
 	sb.WriteString("\n")
-	return utils.CenterText(sb.String(), scrWidth)
+
+	main := utils.CenterText(sb.String(), m.screenWidth)
+	helpText := utils.CenterText(m.help.View(m.calendarViewKeys), m.screenWidth)
+
+	return main + "\n\n" + helpText
 }
