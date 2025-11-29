@@ -76,15 +76,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					},
 				)
 			case key.Matches(msg, m.calendarViewKeys.Help):
-				m.showHelp = !m.showHelp
+				m.help.ShowAll = !m.help.ShowAll
 			case key.Matches(msg, m.calendarViewKeys.ViewEvent):
 				m.viewMode = eventDetailsView
 				m.lastViewMode = calendarView
-				m.showHelp = false
+				m.help.ShowAll = false
 			case key.Matches(msg, m.calendarViewKeys.AddEvent):
 				m.viewMode = addEventView
 				m.lastViewMode = calendarView
-				m.showHelp = false
+				m.help.ShowAll = false
 			}
 
 		case eventDetailsView:
@@ -94,7 +94,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case key.Matches(msg, m.eventDetailsViewKeys.Back):
 				m.viewMode = m.lastViewMode
 			case key.Matches(msg, m.eventDetailsViewKeys.Help):
-				m.showHelp = !m.showHelp
+				m.help.ShowAll = !m.help.ShowAll
 			case key.Matches(msg, m.eventDetailsViewKeys.ScrollDown):
 				if len(m.events) > 0 && m.dm.idx < len(m.events[m.cm.selected.Format("2006-01-02")])-1 {
 					m.dm.idx++
@@ -106,11 +106,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case key.Matches(msg, m.eventDetailsViewKeys.EditEvent):
 				m.viewMode = editEventView
 				m.lastViewMode = eventDetailsView
-				m.showHelp = false
+				m.help.ShowAll = false
 			case key.Matches(msg, m.eventDetailsViewKeys.AddEvent):
 				m.viewMode = addEventView
 				m.lastViewMode = eventDetailsView
-				m.showHelp = false
+				m.help.ShowAll = false
 			}
 
 		case editEventView:
@@ -119,9 +119,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			case key.Matches(msg, m.editEventViewKeys.Back):
 				m.viewMode = m.lastViewMode
-				m.showHelp = false
+				m.help.ShowAll = false
 			case key.Matches(msg, m.editEventViewKeys.Help):
-				m.showHelp = !m.showHelp
+				m.help.ShowAll = !m.help.ShowAll
 			}
 
 		case addEventView:
@@ -130,9 +130,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			case key.Matches(msg, m.addEventViewKeys.Back):
 				m.viewMode = m.lastViewMode
-				m.showHelp = false
+				m.help.ShowAll = false
 			case key.Matches(msg, m.addEventViewKeys.Help):
-				m.showHelp = !m.showHelp
+				m.help.ShowAll = !m.help.ShowAll
 			case key.Matches(msg, m.addEventViewKeys.Next):
 				m.am.changeFocus(+1)
 			case key.Matches(msg, m.addEventViewKeys.Previous):

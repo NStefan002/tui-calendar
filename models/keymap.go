@@ -25,11 +25,9 @@ func (k calendarViewKeyMap) ShortHelp() []key.Binding {
 
 func (k calendarViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.PrevDay, k.NextDay, k.PrevWeek, k.NextWeek},
-		{k.PrevMonth, k.NextMonth},
+		{k.PrevDay, k.NextDay, k.PrevWeek, k.NextWeek, k.PrevMonth, k.NextMonth},
 		{k.ViewEvent, k.AddEvent},
-		{k.Refresh},
-		{k.Help, k.Quit},
+		{k.Refresh, k.Help, k.Quit},
 	}
 }
 

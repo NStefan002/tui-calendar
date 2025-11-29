@@ -27,8 +27,7 @@ type model struct {
 	addEventViewKeys     addEventViewKeyMap     // key bindings for add event view
 	editEventViewKeys    editEventViewKeyMap    // key bindings for edit event view
 
-	help     help.Model // help view model
-	showHelp bool       // whether to show help view
+	help help.Model // help view model
 
 	calendarService *calendar.Service            // Google Calendar service for API calls
 	events          map[string][]*calendar.Event // key: YYYY-MM-DD, value: list of events for that day
@@ -59,7 +58,6 @@ func CreateModel(srv *calendar.Service) model {
 		addEventViewKeys:     addEventViewKeys,
 		editEventViewKeys:    editEventViewKeys,
 		help:                 help.New(),
-		showHelp:             false,
 		calendarService:      srv,
 		events:               make(map[string][]*calendar.Event),
 		viewMode:             calendarView,
