@@ -80,13 +80,14 @@ var calendarViewKeys = calendarViewKeyMap{
 }
 
 type eventDetailsViewKeyMap struct {
-	Quit       key.Binding
-	Back       key.Binding
-	Help       key.Binding
-	ScrollDown key.Binding
-	ScrollUp   key.Binding
-	EditEvent  key.Binding
-	AddEvent   key.Binding
+	Quit        key.Binding
+	Back        key.Binding
+	Help        key.Binding
+	ScrollDown  key.Binding
+	ScrollUp    key.Binding
+	EditEvent   key.Binding
+	AddEvent    key.Binding
+	DeleteEvent key.Binding
 }
 
 func (k eventDetailsViewKeyMap) ShortHelp() []key.Binding {
@@ -96,7 +97,7 @@ func (k eventDetailsViewKeyMap) ShortHelp() []key.Binding {
 func (k eventDetailsViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.ScrollUp, k.ScrollDown},
-		{k.EditEvent, k.AddEvent},
+		{k.EditEvent, k.AddEvent, k.DeleteEvent},
 		{k.Back, k.Quit, k.Help},
 	}
 }
@@ -129,6 +130,10 @@ var eventDetailsViewKeys = eventDetailsViewKeyMap{
 	AddEvent: key.NewBinding(
 		key.WithKeys("a", "A"),
 		key.WithHelp("a/A", "add new event"),
+	),
+	DeleteEvent: key.NewBinding(
+		key.WithKeys("D", tea.KeyDelete.String()),
+		key.WithHelp("D/del", "delete event"),
 	),
 }
 

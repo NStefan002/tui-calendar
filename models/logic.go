@@ -112,6 +112,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewMode = addEventView
 				m.lastViewMode = eventDetailsView
 				m.help.ShowAll = false
+			case key.Matches(msg, m.eventDetailsViewKeys.DeleteEvent):
+				event := m.events[m.cm.selected.Format("2006-01-02")][m.dm.idx]
+				err := google.DeleteEvent(m.calendarService, event.Id)
+				if err != nil {
+					m.errMessage = fmt.Sprintf("Failed to delete event: %v", err)
+					m.viewMode = m.lastViewMode
+					return m, nil
+				}
+				// return to calendar view after deleting event
+				m.viewMode = calendarView
+				m.help.ShowAll = false
+				m.dm.idx = 0 // reset event index
+				// refresh events after deleting event
+				m.loading = true
+				return m, tea.Batch(
+					m.spinner.Tick, // start spinner
+					func() tea.Msg {
+						events, err := google.FetchEvents(m.calendarService, m.cm.viewing)
+						if err != nil {
+							return errMsg{err}
+						}
+						return eventsMsg(events)
+					},
+				)
 			}
 
 		case editEventView:

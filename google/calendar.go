@@ -49,3 +49,11 @@ func CreateEvent(srv *calendar.Service, event *calendar.Event) (*calendar.Event,
 	}
 	return createdEvent, nil
 }
+
+func DeleteEvent(srv *calendar.Service, eventID string) error {
+	err := srv.Events.Delete("primary", eventID).Do()
+	if err != nil {
+		return fmt.Errorf("failed to delete event: %w", err)
+	}
+	return nil
+}
