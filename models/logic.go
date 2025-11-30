@@ -1,9 +1,8 @@
 package models
 
 import (
-	"context"
 	"fmt"
-	"time"
+	"tui-calendar/google"
 	"tui-calendar/utils"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -20,7 +19,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(
 		m.spinner.Tick, // start spinner on app load
 		func() tea.Msg {
-			events, err := fetchEvents(m.calendarService, m.cm.viewing)
+			events, err := google.FetchEvents(m.calendarService, m.cm.viewing)
 			if err != nil {
 				return errMsg{err}
 			}
@@ -68,7 +67,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Batch(
 					m.spinner.Tick, // start spinner
 					func() tea.Msg {
-						events, err := fetchEvents(m.calendarService, m.cm.viewing)
+						events, err := google.FetchEvents(m.calendarService, m.cm.viewing)
 						if err != nil {
 							return errMsg{err}
 						}
@@ -85,6 +84,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewMode = addEventView
 				m.lastViewMode = calendarView
 				m.help.ShowAll = false
+				m.am.selectedDate = m.cm.selected
+				m.am.resetForm()
 			}
 
 		case eventDetailsView:
@@ -133,18 +134,62 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.help.ShowAll = false
 			case key.Matches(msg, m.addEventViewKeys.Help):
 				m.help.ShowAll = !m.help.ShowAll
+			case key.Matches(msg, m.addEventViewKeys.Check):
+				toggled := m.am.toggleAllDay()
+				if !toggled {
+					cmds := make([]tea.Cmd, 3)
+					m.am.titleInput, cmds[0] = m.am.titleInput.Update(msg)
+					m.am.descriptionInput, cmds[1] = m.am.descriptionInput.Update(msg)
+					m.am.locationInput, cmds[2] = m.am.locationInput.Update(msg)
+
+					return m, tea.Batch(cmds...)
+				}
+			case key.Matches(msg, m.addEventViewKeys.MinuteUp):
+				m.am.changeMinutes(+1)
+			case key.Matches(msg, m.addEventViewKeys.MinuteDown):
+				m.am.changeMinutes(-1)
+			case key.Matches(msg, m.addEventViewKeys.HourUp):
+				m.am.changeHours(+1)
+			case key.Matches(msg, m.addEventViewKeys.HourDown):
+				m.am.changeHours(-1)
 			case key.Matches(msg, m.addEventViewKeys.Next):
 				m.am.changeFocus(+1)
 			case key.Matches(msg, m.addEventViewKeys.Previous):
 				m.am.changeFocus(-1)
 			case key.Matches(msg, m.addEventViewKeys.Submit):
-				// test print
-				fmt.Printf("Title: %s, Desc: %s, Location: %s\n\n", m.am.title.Value(), m.am.description.Value(), m.am.location.Value())
+				event, err := m.am.submit()
+				if err != nil {
+					m.errMessage = fmt.Sprintf("Failed to submit form: %v", err)
+					m.viewMode = m.lastViewMode
+					return m, nil
+				}
+				_, err = google.CreateEvent(m.calendarService, event)
+				if err != nil {
+					m.errMessage = fmt.Sprintf("Failed to create event: %v", err)
+					m.viewMode = m.lastViewMode
+					return m, nil
+				}
+				// return to calendar view after creating event
+				m.viewMode = calendarView
+				m.am.resetForm()
+				m.help.ShowAll = false
+				// refresh events after creating new event
+				m.loading = true
+				return m, tea.Batch(
+					m.spinner.Tick, // start spinner
+					func() tea.Msg {
+						events, err := google.FetchEvents(m.calendarService, m.cm.viewing)
+						if err != nil {
+							return errMsg{err}
+						}
+						return eventsMsg(events)
+					},
+				)
 			default:
 				cmds := make([]tea.Cmd, 3)
-				m.am.title, cmds[0] = m.am.title.Update(msg)
-				m.am.description, cmds[1] = m.am.description.Update(msg)
-				m.am.location, cmds[2] = m.am.location.Update(msg)
+				m.am.titleInput, cmds[0] = m.am.titleInput.Update(msg)
+				m.am.descriptionInput, cmds[1] = m.am.descriptionInput.Update(msg)
+				m.am.locationInput, cmds[2] = m.am.locationInput.Update(msg)
 
 				return m, tea.Batch(cmds...)
 			}
@@ -184,38 +229,4 @@ func (m model) View() string {
 	default:
 		return "ERROR"
 	}
-}
-
-func fetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calendar.Event, error) {
-	start := time.Date(viewing.Year()-30, 0, 0, 0, 0, 0, 0, viewing.Location())
-	end := time.Date(viewing.Year()+30, 0, 0, 0, 0, 0, 0, viewing.Location())
-
-	events := make(map[string][]*calendar.Event)
-
-	call := srv.Events.List("primary").
-		ShowDeleted(false).
-		SingleEvents(true).
-		TimeMin(start.Format(time.RFC3339)).
-		TimeMax(end.Format(time.RFC3339)).
-		OrderBy("startTime")
-
-	resp, err := call.Context(context.Background()).Do()
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch events: %w", err)
-	}
-
-	for _, item := range resp.Items {
-		date := item.Start.DateTime
-		if date == "" {
-			date = item.Start.Date // all-day event
-		}
-		t, err := time.Parse(time.RFC3339, date)
-		if err != nil {
-			continue
-		}
-		dateKey := t.Format("2006-01-02")
-		events[dateKey] = append(events[dateKey], item)
-	}
-
-	return events, nil
 }

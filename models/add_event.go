@@ -1,5 +1,3 @@
-// TODO: implement all fields
-
 package models
 
 import (
@@ -10,51 +8,94 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
+	"google.golang.org/api/calendar/v3"
 
 	"tui-calendar/styles"
 	"tui-calendar/utils"
 )
 
 type addEventModel struct {
-	title       textinput.Model // title of the new event
-	description textarea.Model  // description of the new event
-	startTime   time.Time       // start time of the new event
-	endTime     time.Time       // end time of the new event
-	location    textinput.Model // location of the new event
-	allDay      bool            // whether the event is an all-day event
-	idx         int             // index of the field being edited
+	titleInput       textinput.Model // 0
+	descriptionInput textarea.Model  // 1
+	startTimeInput   textinput.Model // 2
+	endTimeInput     textinput.Model // 3
+	locationInput    textinput.Model // 4
+	allDayInput      textinput.Model // 5
+
+	title       string
+	description string
+	startTime   time.Time
+	endTime     time.Time
+	location    string
+	allDay      bool
+
+	selectedDate time.Time
+
+	idx int
 }
 
 func newAM() *addEventModel {
 	am := &addEventModel{
-		title:       textinput.New(),
-		description: textarea.New(),
-		location:    textinput.New(),
-		startTime:   time.Now(),
-		endTime:     time.Now().Add(time.Hour), // default to 1 hour later
+		titleInput:       textinput.New(),
+		descriptionInput: textarea.New(),
+		startTimeInput:   textinput.New(),
+		endTimeInput:     textinput.New(),
+		locationInput:    textinput.New(),
+		allDayInput:      textinput.New(),
+
+		title:       "",
+		description: "",
+		location:    "",
 		allDay:      false,
-		idx:         0,
+
+		idx: 0,
 	}
-	am.title.Placeholder = "Title"
-	am.title.Width = 50
-	am.title.CharLimit = 50
-	am.title.Focus()
-	am.title.PromptStyle = styles.ActiveTextinput
-	am.title.TextStyle = styles.ActiveTextinput
-	am.title.Cursor.Style = styles.ActiveTextinput
 
-	am.description.Placeholder = "Description"
-	am.description.FocusedStyle.Prompt = styles.ActiveTextinput
-	am.description.FocusedStyle.Text = styles.ActiveTextinput
-	am.description.BlurredStyle.Prompt = styles.InactiveTextinput
-	am.description.BlurredStyle.Text = styles.InactiveTextinput
+	// --- Title ---
+	am.titleInput.Placeholder = "Title"
+	am.titleInput.CharLimit = 50
+	am.titleInput.Width = 50
+	am.titleInput.Focus()
+	am.titleInput.PromptStyle = styles.ActiveTextinput
+	am.titleInput.TextStyle = styles.ActiveTextinput
+	am.titleInput.Cursor.Style = styles.ActiveTextinput
 
-	am.location.Placeholder = "Location"
-	am.location.Width = 50
-	am.location.CharLimit = 100
-	am.location.PromptStyle = styles.InactiveTextinput
-	am.location.TextStyle = styles.InactiveTextinput
-	am.location.Cursor.Style = styles.InactiveTextinput
+	// --- Description ---
+	am.descriptionInput.Placeholder = "Description"
+	am.descriptionInput.FocusedStyle.Prompt = styles.ActiveTextinput
+	am.descriptionInput.FocusedStyle.Text = styles.ActiveTextinput
+	am.descriptionInput.BlurredStyle.Prompt = styles.InactiveTextinput
+	am.descriptionInput.BlurredStyle.Text = styles.InactiveTextinput
+
+	// --- Start time ---
+	am.startTimeInput.Placeholder = "HH:MM"
+	am.startTimeInput.Width = 8
+	am.startTimeInput.PromptStyle = styles.InactiveTextinput
+	am.startTimeInput.TextStyle = styles.InactiveTextinput
+	am.startTimeInput.Cursor.Style = styles.InactiveTextinput
+
+	// --- End time ---
+	am.endTimeInput.Placeholder = "HH:MM"
+	am.endTimeInput.Width = 8
+	am.endTimeInput.PromptStyle = styles.InactiveTextinput
+	am.endTimeInput.TextStyle = styles.InactiveTextinput
+	am.endTimeInput.Cursor.Style = styles.InactiveTextinput
+
+	am.initTimes()
+
+	// --- Location ---
+	am.locationInput.Placeholder = "Location"
+	am.locationInput.Width = 50
+	am.locationInput.CharLimit = 100
+	am.locationInput.PromptStyle = styles.InactiveTextinput
+	am.locationInput.TextStyle = styles.InactiveTextinput
+	am.locationInput.Cursor.Style = styles.InactiveTextinput
+
+	// --- All-day ---
+	am.allDayInput.Prompt = ""
+	am.allDayInput.SetValue("   ")
+	am.allDayInput.PromptStyle = styles.InactiveTextinput
+	am.allDayInput.TextStyle = styles.InactiveTextinput
 
 	return am
 }
@@ -62,66 +103,300 @@ func newAM() *addEventModel {
 func (am *addEventModel) view(m *model) string {
 	var sb strings.Builder
 
-	// header
+	// Header
 	header := styles.Header.Render(fmt.Sprintf("➕ Add Event for %s", m.cm.selected.Format("January 2, 2006")))
 	sb.WriteString(utils.CenterText(header, m.screenWidth) + "\n\n")
 
-	// form fields
-	fields := []string{
-		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Title:"), am.title.View()),
+	formFields := []string{
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Title:"), am.titleInput.View()),
+
 		"\n",
-		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Description:"), am.description.View()),
+
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Description:"), am.descriptionInput.View()),
+
 		"\n",
-		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Location:"), am.location.View()),
+
+		lipgloss.JoinHorizontal(lipgloss.Top,
+			styles.FieldLabel.Render("Start:"),
+			am.startTimeInput.View(),
+		),
+
+		"\n",
+
+		lipgloss.JoinHorizontal(lipgloss.Top,
+			styles.FieldLabel.Render("End:"),
+			am.endTimeInput.View(),
+		),
+
+		"\n",
+
+		lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			styles.FieldLabel.Render("Location:"),
+			am.locationInput.View(),
+		),
+
+		"\n",
+
+		// All-day toggle
+		lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			styles.FieldLabel.Render("All-day:"),
+			am.allDayInput.View(),
+		),
 	}
 
-	form := lipgloss.JoinVertical(lipgloss.Left, fields...)
-	box := styles.Box.Render(form)
+	form := lipgloss.JoinVertical(lipgloss.Left, formFields...)
+	box := styles.Box.
+		Border(lipgloss.RoundedBorder()).
+		Padding(1, 2).
+		Render(form)
 
 	sb.WriteString(utils.CenterText(box, m.screenWidth))
 
-	helpText := m.help.View(m.addEventViewKeys)
-	sb.WriteString("\n\n" + utils.CenterText(helpText, m.screenWidth))
+	// help text
+	help := m.help.View(m.addEventViewKeys)
+	sb.WriteString("\n\n" + utils.CenterText(help, m.screenWidth))
 
 	return sb.String()
 }
 
+// Rotates focus between fields 0..5
 func (am *addEventModel) changeFocus(direction int) {
+	// blur current
 	switch am.idx {
 	case 0:
-		am.title.Blur()
-		am.title.PromptStyle = styles.InactiveTextinput
-		am.title.TextStyle = styles.InactiveTextinput
-		am.title.Cursor.Style = styles.InactiveTextinput
+		am.titleInput.Blur()
+		am.titleInput.PromptStyle = styles.InactiveTextinput
+		am.titleInput.TextStyle = styles.InactiveTextinput
+		am.titleInput.Cursor.Style = styles.InactiveTextinput
 	case 1:
-		am.description.Blur()
+		am.descriptionInput.Blur()
 	case 2:
+		am.startTimeInput.Blur()
+		am.startTimeInput.PromptStyle = styles.InactiveTextinput
+		am.startTimeInput.TextStyle = styles.InactiveTextinput
+		am.startTimeInput.Cursor.Style = styles.InactiveTextinput
 	case 3:
+		am.endTimeInput.Blur()
+		am.endTimeInput.PromptStyle = styles.InactiveTextinput
+		am.endTimeInput.TextStyle = styles.InactiveTextinput
+		am.endTimeInput.Cursor.Style = styles.InactiveTextinput
 	case 4:
-		am.location.Blur()
-		am.location.PromptStyle = styles.InactiveTextinput
-		am.location.TextStyle = styles.InactiveTextinput
-		am.location.Cursor.Style = styles.InactiveTextinput
+		am.locationInput.Blur()
+		am.locationInput.PromptStyle = styles.InactiveTextinput
+		am.locationInput.TextStyle = styles.InactiveTextinput
+		am.locationInput.Cursor.Style = styles.InactiveTextinput
 	case 5:
+		am.allDayInput.Blur()
+		am.allDayInput.PromptStyle = styles.InactiveTextinput
+		am.allDayInput.TextStyle = styles.InactiveTextinput
 	}
 
-	am.idx = (am.idx + direction) % 6
+	am.idx = (am.idx + direction + 6) % 6
 
+	// focus new
 	switch am.idx {
 	case 0:
-		am.title.Focus()
-		am.title.PromptStyle = styles.ActiveTextinput
-		am.title.TextStyle = styles.ActiveTextinput
-		am.title.Cursor.Style = styles.ActiveTextinput
+		am.titleInput.Focus()
+		am.titleInput.PromptStyle = styles.ActiveTextinput
+		am.titleInput.TextStyle = styles.ActiveTextinput
+		am.titleInput.Cursor.Style = styles.ActiveTextinput
 	case 1:
-		am.description.Focus()
+		am.descriptionInput.Focus()
 	case 2:
+		am.startTimeInput.Focus()
+		am.startTimeInput.PromptStyle = styles.ActiveTextinput
+		am.startTimeInput.TextStyle = styles.ActiveTextinput
+		am.startTimeInput.Cursor.Style = styles.ActiveTextinput
 	case 3:
+		am.endTimeInput.Focus()
+		am.endTimeInput.PromptStyle = styles.ActiveTextinput
+		am.endTimeInput.TextStyle = styles.ActiveTextinput
+		am.endTimeInput.Cursor.Style = styles.ActiveTextinput
 	case 4:
-		am.location.Focus()
-		am.location.PromptStyle = styles.ActiveTextinput
-		am.location.TextStyle = styles.ActiveTextinput
-		am.location.Cursor.Style = styles.ActiveTextinput
+		am.locationInput.Focus()
+		am.locationInput.PromptStyle = styles.ActiveTextinput
+		am.locationInput.TextStyle = styles.ActiveTextinput
+		am.locationInput.Cursor.Style = styles.ActiveTextinput
 	case 5:
+		am.allDayInput.Focus()
+		am.allDayInput.PromptStyle = styles.ActiveTextinput
+		am.allDayInput.TextStyle = styles.ActiveTextinput
 	}
+}
+
+func (am *addEventModel) resetForm() {
+	am.titleInput.SetValue("")
+	am.descriptionInput.SetValue("")
+	am.locationInput.SetValue("")
+	am.allDay = false
+	am.allDayInput.SetValue("   ")
+	am.initTimes()
+	am.idx = 0
+	am.title = ""
+	am.description = ""
+	am.location = ""
+	am.changeFocus(0)
+}
+
+func (am *addEventModel) initTimes() {
+	now := time.Now()
+	if am.allDay {
+		am.startTime = time.Date(am.selectedDate.Year(), am.selectedDate.Month(), am.selectedDate.Day(), 0, 0, 0, 0, am.selectedDate.Location())
+		am.endTime = am.startTime.Add(23*time.Hour + 59*time.Minute)
+	} else {
+		am.startTime = time.Date(am.selectedDate.Year(), am.selectedDate.Month(), am.selectedDate.Day(), now.Hour(), now.Minute(), 0, 0, am.selectedDate.Location())
+		am.endTime = am.startTime.Add(time.Hour)
+	}
+	am.startTimeInput.SetValue(am.startTime.Format("15:04"))
+	am.endTimeInput.SetValue(am.endTime.Format("15:04"))
+}
+
+// returns true if toggled
+func (am *addEventModel) toggleAllDay() bool {
+	if am.idx == 5 {
+		am.allDay = !am.allDay
+		am.initTimes()
+		am.allDayInput.SetValue(func() string {
+			if am.allDay {
+				return "✓  "
+			}
+			return "   "
+		}())
+		return true
+	}
+	return false
+}
+
+func (am *addEventModel) changeMinutes(delta int) {
+	if am.idx == 2 || am.idx == 3 {
+		var input *textinput.Model
+		var currentTime time.Time
+
+		if am.idx == 2 {
+			input = &am.startTimeInput
+			currentTime = am.startTime
+		} else {
+			input = &am.endTimeInput
+			currentTime = am.endTime
+		}
+
+		// parse current input value
+		parsedTime, err := time.Parse("15:04", input.Value())
+		if err != nil {
+			return // invalid time format, do nothing
+		}
+
+		// create a new time with the same date but updated time
+		newTime := time.Date(
+			currentTime.Year(),
+			currentTime.Month(),
+			currentTime.Day(),
+			parsedTime.Hour(),
+			parsedTime.Minute(),
+			0, 0, currentTime.Location(),
+		).Add(time.Duration(delta) * time.Minute)
+
+		// update the input value
+		input.SetValue(newTime.Format("15:04"))
+
+		// update the corresponding field
+		if am.idx == 2 {
+			am.startTime = newTime
+		} else {
+			am.endTime = newTime
+		}
+	}
+}
+
+func (am *addEventModel) changeHours(delta int) {
+	if am.idx == 2 || am.idx == 3 {
+		var input *textinput.Model
+		var currentTime time.Time
+
+		if am.idx == 2 {
+			input = &am.startTimeInput
+			currentTime = am.startTime
+		} else {
+			input = &am.endTimeInput
+			currentTime = am.endTime
+		}
+
+		// parse current input value
+		parsedTime, err := time.Parse("15:04", input.Value())
+		if err != nil {
+			return // invalid time format, do nothing
+		}
+
+		// create a new time with the same date but updated time
+		newTime := time.Date(
+			currentTime.Year(),
+			currentTime.Month(),
+			currentTime.Day(),
+			parsedTime.Hour(),
+			parsedTime.Minute(),
+			0, 0, currentTime.Location(),
+		).Add(time.Duration(delta) * time.Hour)
+
+		// update the input value
+		input.SetValue(newTime.Format("15:04"))
+
+		// update the corresponding field
+		if am.idx == 2 {
+			am.startTime = newTime
+		} else {
+			am.endTime = newTime
+		}
+	}
+}
+
+func (am *addEventModel) submit() (*calendar.Event, error) {
+	// gather data
+	am.title = am.titleInput.Value()
+	am.description = am.descriptionInput.Value()
+	am.location = am.locationInput.Value()
+
+	// parse start time
+	startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
+	if err != nil {
+		return nil, fmt.Errorf("invalid start time format")
+	}
+	am.startTime = time.Date(
+		am.startTime.Year(),
+		am.startTime.Month(),
+		am.startTime.Day(),
+		startParsed.Hour(),
+		startParsed.Minute(),
+		0, 0, am.startTime.Location(),
+	)
+
+	// parse end time
+	endParsed, err := time.Parse("15:04", am.endTimeInput.Value())
+	if err != nil {
+		return nil, fmt.Errorf("invalid end time format")
+	}
+	am.endTime = time.Date(
+		am.endTime.Year(),
+		am.endTime.Month(),
+		am.endTime.Day(),
+		endParsed.Hour(),
+		endParsed.Minute(),
+		0, 0, am.endTime.Location(),
+	)
+
+	// create calendar event
+	event := &calendar.Event{
+		Summary:     am.title,
+		Description: am.description,
+		Location:    am.location,
+		Start: &calendar.EventDateTime{
+			DateTime: am.startTime.Format(time.RFC3339),
+		},
+		End: &calendar.EventDateTime{
+			DateTime: am.endTime.Format(time.RFC3339),
+		},
+	}
+
+	return event, nil
 }
