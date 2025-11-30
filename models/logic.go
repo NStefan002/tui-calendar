@@ -134,23 +134,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.help.ShowAll = false
 			case key.Matches(msg, m.addEventViewKeys.Help):
 				m.help.ShowAll = !m.help.ShowAll
-			case key.Matches(msg, m.addEventViewKeys.Check):
-				toggled := m.am.toggleAllDay()
-				if !toggled {
-					cmds := make([]tea.Cmd, 3)
-					m.am.titleInput, cmds[0] = m.am.titleInput.Update(msg)
-					m.am.descriptionInput, cmds[1] = m.am.descriptionInput.Update(msg)
-					m.am.locationInput, cmds[2] = m.am.locationInput.Update(msg)
-
-					return m, tea.Batch(cmds...)
-				}
-			case key.Matches(msg, m.addEventViewKeys.MinuteUp):
+			case key.Matches(msg, m.addEventViewKeys.Check) && m.am.checkBoxFocused():
+				m.am.toggleAllDay()
+			case key.Matches(msg, m.addEventViewKeys.MinuteUp) && m.am.timeFieldFocused():
 				m.am.changeMinutes(+1)
-			case key.Matches(msg, m.addEventViewKeys.MinuteDown):
+			case key.Matches(msg, m.addEventViewKeys.MinuteDown) && m.am.timeFieldFocused():
 				m.am.changeMinutes(-1)
-			case key.Matches(msg, m.addEventViewKeys.HourUp):
+			case key.Matches(msg, m.addEventViewKeys.HourUp) && m.am.timeFieldFocused():
 				m.am.changeHours(+1)
-			case key.Matches(msg, m.addEventViewKeys.HourDown):
+			case key.Matches(msg, m.addEventViewKeys.HourDown) && m.am.timeFieldFocused():
 				m.am.changeHours(-1)
 			case key.Matches(msg, m.addEventViewKeys.Next):
 				m.am.changeFocus(+1)

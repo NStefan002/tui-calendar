@@ -192,8 +192,8 @@ func (k addEventViewKeyMap) FullHelp() [][]key.Binding {
 
 var addEventViewKeys = addEventViewKeyMap{
 	Quit: key.NewBinding(
-		key.WithKeys("q", tea.KeyCtrlC.String()),
-		key.WithHelp("q/ctrl+c", "quit"),
+		key.WithKeys(tea.KeyCtrlC.String()),
+		key.WithHelp("ctrl+c", "quit"),
 	),
 	Back: key.NewBinding(
 		key.WithKeys(tea.KeyEsc.String()),

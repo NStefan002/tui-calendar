@@ -161,6 +161,14 @@ func (am *addEventModel) view(m *model) string {
 	return sb.String()
 }
 
+func (am *addEventModel) checkBoxFocused() bool {
+	return am.idx == 5
+}
+
+func (am *addEventModel) timeFieldFocused() bool {
+	return am.idx == 2 || am.idx == 3
+}
+
 // Rotates focus between fields 0..5
 func (am *addEventModel) changeFocus(direction int) {
 	// blur current
@@ -253,20 +261,19 @@ func (am *addEventModel) initTimes() {
 	am.endTimeInput.SetValue(am.endTime.Format("15:04"))
 }
 
-// returns true if toggled
-func (am *addEventModel) toggleAllDay() bool {
-	if am.idx == 5 {
-		am.allDay = !am.allDay
-		am.initTimes()
-		am.allDayInput.SetValue(func() string {
-			if am.allDay {
-				return "✓  "
-			}
-			return "   "
-		}())
-		return true
+func (am *addEventModel) toggleAllDay() {
+	if am.idx != 5 {
+		return
 	}
-	return false
+
+	am.allDay = !am.allDay
+	am.initTimes()
+	am.allDayInput.SetValue(func() string {
+		if am.allDay {
+			return "✓  "
+		}
+		return "   "
+	}())
 }
 
 func (am *addEventModel) changeMinutes(delta int) {
