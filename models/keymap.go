@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/charmbracelet/bubbles/key"
+	tea "github.com/charmbracelet/bubbletea"
 	// "github.com/charmbracelet/bubbles/help"
 )
 
@@ -33,31 +34,31 @@ func (k calendarViewKeyMap) FullHelp() [][]key.Binding {
 
 var calendarViewKeys = calendarViewKeyMap{
 	PrevDay: key.NewBinding(
-		key.WithKeys("left", "h"),
+		key.WithKeys(tea.KeyLeft.String(), "h"),
 		key.WithHelp("←/h", "previous day"),
 	),
 	NextDay: key.NewBinding(
-		key.WithKeys("right", "l"),
+		key.WithKeys(tea.KeyRight.String(), "l"),
 		key.WithHelp("→/l", "next day"),
 	),
 	PrevWeek: key.NewBinding(
-		key.WithKeys("up", "k"),
+		key.WithKeys(tea.KeyUp.String(), "k"),
 		key.WithHelp("↑/k", "previous week"),
 	),
 	NextWeek: key.NewBinding(
-		key.WithKeys("down", "j"),
+		key.WithKeys(tea.KeyDown.String(), "j"),
 		key.WithHelp("↓/j", "next week"),
 	),
 	PrevMonth: key.NewBinding(
-		key.WithKeys("pageup", "pgup", "ctrl+u"),
+		key.WithKeys(tea.KeyPgUp.String(), tea.KeyCtrlU.String()),
 		key.WithHelp("pgup/ctrl+u", "previous month"),
 	),
 	NextMonth: key.NewBinding(
-		key.WithKeys("pagedown", "pgdown", "ctrl+d"),
+		key.WithKeys(tea.KeyPgDown.String(), tea.KeyCtrlD.String()),
 		key.WithHelp("pgdown/ctrl+d", "next month"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
+		key.WithKeys("q", tea.KeyCtrlC.String()),
 		key.WithHelp("q/ctrl+c", "quit"),
 	),
 	Help: key.NewBinding(
@@ -69,7 +70,7 @@ var calendarViewKeys = calendarViewKeyMap{
 		key.WithHelp("r", "refresh events"),
 	),
 	ViewEvent: key.NewBinding(
-		key.WithKeys("enter"),
+		key.WithKeys(tea.KeyEnter.String()),
 		key.WithHelp("enter", "view event details"),
 	),
 	AddEvent: key.NewBinding(
@@ -102,11 +103,11 @@ func (k eventDetailsViewKeyMap) FullHelp() [][]key.Binding {
 
 var eventDetailsViewKeys = eventDetailsViewKeyMap{
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
+		key.WithKeys("q", tea.KeyCtrlC.String()),
 		key.WithHelp("q/ctrl+c", "quit"),
 	),
 	Back: key.NewBinding(
-		key.WithKeys("esc"),
+		key.WithKeys(tea.KeyEsc.String()),
 		key.WithHelp("esc", "back to previous view"),
 	),
 	Help: key.NewBinding(
@@ -114,11 +115,11 @@ var eventDetailsViewKeys = eventDetailsViewKeyMap{
 		key.WithHelp("?", "toggle help"),
 	),
 	ScrollDown: key.NewBinding(
-		key.WithKeys("down", "j"),
+		key.WithKeys(tea.KeyDown.String(), "j"),
 		key.WithHelp("↓/j", "scroll down"),
 	),
 	ScrollUp: key.NewBinding(
-		key.WithKeys("up", "k"),
+		key.WithKeys(tea.KeyUp.String(), "k"),
 		key.WithHelp("↑/k", "scroll up"),
 	),
 	EditEvent: key.NewBinding(
@@ -149,11 +150,11 @@ func (k editEventViewKeyMap) FullHelp() [][]key.Binding {
 
 var editEventViewKeys = editEventViewKeyMap{
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
+		key.WithKeys("q", tea.KeyCtrlC.String()),
 		key.WithHelp("q/ctrl+c", "quit"),
 	),
 	Back: key.NewBinding(
-		key.WithKeys("esc"),
+		key.WithKeys(tea.KeyEsc.String()),
 		key.WithHelp("esc", "back to previous view"),
 	),
 	Help: key.NewBinding(
@@ -163,12 +164,17 @@ var editEventViewKeys = editEventViewKeyMap{
 }
 
 type addEventViewKeyMap struct {
-	Quit     key.Binding
-	Back     key.Binding
-	Help     key.Binding
-	Next     key.Binding
-	Previous key.Binding
-	Submit   key.Binding
+	Quit       key.Binding
+	Back       key.Binding
+	Help       key.Binding
+	MinuteUp   key.Binding
+	MinuteDown key.Binding
+	HourUp     key.Binding
+	HourDown   key.Binding
+	Check      key.Binding
+	Next       key.Binding
+	Previous   key.Binding
+	Submit     key.Binding
 }
 
 func (k addEventViewKeyMap) ShortHelp() []key.Binding {
@@ -178,34 +184,55 @@ func (k addEventViewKeyMap) ShortHelp() []key.Binding {
 func (k addEventViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Next, k.Previous},
-		{k.Submit},
+		{k.MinuteUp, k.MinuteDown, k.HourUp, k.HourDown},
+		{k.Check, k.Submit},
 		{k.Back, k.Quit, k.Help},
 	}
 }
 
 var addEventViewKeys = addEventViewKeyMap{
 	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
+		key.WithKeys("q", tea.KeyCtrlC.String()),
 		key.WithHelp("q/ctrl+c", "quit"),
 	),
 	Back: key.NewBinding(
-		key.WithKeys("esc"),
+		key.WithKeys(tea.KeyEsc.String()),
 		key.WithHelp("esc", "back to previous view"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),
 		key.WithHelp("?", "toggle help"),
 	),
+	MinuteUp: key.NewBinding(
+		key.WithKeys(tea.KeyCtrlUp.String(), "K"),
+		key.WithHelp("ctrl+↑/K", "increase minutes"),
+	),
+	MinuteDown: key.NewBinding(
+		key.WithKeys(tea.KeyCtrlDown.String(), "J"),
+		key.WithHelp("ctrl+↓/J", "decrease minutes"),
+	),
+	HourUp: key.NewBinding(
+		key.WithKeys("alt+up", "k"),
+		key.WithHelp("alt+↑/k", "increase hours"),
+	),
+	HourDown: key.NewBinding(
+		key.WithKeys("alt+down", "j"),
+		key.WithHelp("alt+↓/j", "decrease hours"),
+	),
+	Check: key.NewBinding(
+		key.WithKeys(tea.KeyEnter.String(), tea.KeySpace.String()),
+		key.WithHelp("enter/space", "toggle all-day event"),
+	),
 	Next: key.NewBinding(
-		key.WithKeys("tab", "down", "ctrl+n"),
+		key.WithKeys(tea.KeyTab.String(), tea.KeyDown.String(), tea.KeyCtrlN.String()),
 		key.WithHelp("tab/↓/ctrl+n", "next field"),
 	),
 	Previous: key.NewBinding(
-		key.WithKeys("shift+tab", "up", "ctrl+p"),
+		key.WithKeys(tea.KeyShiftTab.String(), tea.KeyUp.String(), tea.KeyCtrlP.String()),
 		key.WithHelp("shift+tab/↑/ctrl+p", "previous field"),
 	),
 	Submit: key.NewBinding(
-		key.WithKeys("ctrl+s", "enter"),
-		key.WithHelp("ctrl+s/enter", "submit"),
+		key.WithKeys(tea.KeyCtrlS.String()),
+		key.WithHelp("ctrl+s", "submit"),
 	),
 }
