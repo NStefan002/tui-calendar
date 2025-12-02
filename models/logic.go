@@ -112,6 +112,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewMode = addEventView
 				m.lastViewMode = eventDetailsView
 				m.help.ShowAll = false
+				m.am.selectedDate = m.cm.selected
+				m.am.resetForm()
 			case key.Matches(msg, m.eventDetailsViewKeys.DeleteEvent):
 				event := m.events[m.cm.selected.Format("2006-01-02")][m.dm.idx]
 				err := google.DeleteEvent(m.calendarService, event.Id)
