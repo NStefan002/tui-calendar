@@ -251,14 +251,16 @@ func (am *addEventModel) resetForm() {
 func (am *addEventModel) initTimes() {
 	now := time.Now()
 	if am.allDay {
-		am.startTime = time.Date(am.selectedDate.Year(), am.selectedDate.Month(), am.selectedDate.Day(), 0, 0, 0, 0, am.selectedDate.Location())
-		am.endTime = am.startTime.Add(23*time.Hour + 59*time.Minute)
+		am.startTime = am.selectedDate
+		am.endTime = am.selectedDate.Add(24 * time.Hour)
+		am.startTimeInput.SetValue(am.startTime.Format("     "))
+		am.endTimeInput.SetValue(am.endTime.Format("     "))
 	} else {
 		am.startTime = time.Date(am.selectedDate.Year(), am.selectedDate.Month(), am.selectedDate.Day(), now.Hour(), now.Minute(), 0, 0, am.selectedDate.Location())
 		am.endTime = am.startTime.Add(time.Hour)
+		am.startTimeInput.SetValue(am.startTime.Format("15:04"))
+		am.endTimeInput.SetValue(am.endTime.Format("15:04"))
 	}
-	am.startTimeInput.SetValue(am.startTime.Format("15:04"))
-	am.endTimeInput.SetValue(am.endTime.Format("15:04"))
 }
 
 func (am *addEventModel) toggleAllDay() {
@@ -363,6 +365,22 @@ func (am *addEventModel) submit() (*calendar.Event, error) {
 	am.title = am.titleInput.Value()
 	am.description = am.descriptionInput.Value()
 	am.location = am.locationInput.Value()
+	if am.allDay {
+		// create calendar event
+		event := &calendar.Event{
+			Summary:     am.title,
+			Description: am.description,
+			Location:    am.location,
+			Start: &calendar.EventDateTime{
+				Date: am.startTime.Format("2006-01-02"),
+			},
+			End: &calendar.EventDateTime{
+				Date: am.endTime.Format("2006-01-02"),
+			},
+		}
+
+		return event, nil
+	}
 
 	// parse start time
 	startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
