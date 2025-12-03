@@ -54,12 +54,15 @@ func (dm *eventDetailsModel) view(m *model) string {
 	right.WriteString(utils.CenterText(styles.DetailTitle.Render(eventTitle), 50) + "\n\n")
 
 	// times
-	var startStr, endStr string
+	startStr, endStr := "", ""
 	if selected.Start != nil && selected.Start.DateTime != "" {
 		startTime, err := time.Parse(time.RFC3339, selected.Start.DateTime)
 		if err == nil {
 			startStr = styles.TimeLabel.Render("Start: ") + styles.TimeValue.Render(startTime.Format("Mon, Jan 2 — 15:04"))
 		}
+	} else if selected.Start != nil && selected.Start.Date != "" {
+		// all-day event
+		startStr = styles.TimeValue.Render("All-day event")
 	}
 	if selected.End != nil && selected.End.DateTime != "" {
 		endTime, err := time.Parse(time.RFC3339, selected.End.DateTime)

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 	"tui-calendar/styles"
@@ -78,12 +79,25 @@ func (cm *calendarModel) view(m *model) string {
 		eventsHeader := styles.EventHeader.Render("Events for " + cm.selected.Format("January 2, 2006"))
 		sb.WriteString("\n\n\n" + eventsHeader + "\n")
 		for _, event := range events {
-			eventTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
-			if err != nil {
-				continue
+			eventTimeStr := ""
+			if event.Start.DateTime == "" {
+				// All-day event
+				eventTimeStr = styles.TimeValue.Render("All Day")
+			} else {
+				eventTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
+				if err != nil {
+					log.Println("Error parsing event time:", err)
+					continue
+				}
+				eventTimeStr = styles.TimeValue.Render(eventTime.Format("15:04"))
 			}
-			eventTimeStr := styles.Event.Render(eventTime.Format("15:04"))
-			eventTitle := styles.Event.Render(event.Summary)
+			titleStr := ""
+			if event.Summary == "" {
+				titleStr = "(No Title)"
+			} else {
+				titleStr = event.Summary
+			}
+			eventTitle := styles.Event.Render(titleStr)
 			eventTimeTitleGap := strings.Repeat(" ", lipgloss.Width(eventsHeader)-lipgloss.Width(eventTimeStr)-lipgloss.Width(eventTitle))
 			sb.WriteString(fmt.Sprintf("\n%s%s%s", eventTimeStr, eventTimeTitleGap, eventTitle))
 		}

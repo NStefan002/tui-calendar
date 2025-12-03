@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"google.golang.org/api/calendar/v3"
@@ -28,14 +29,17 @@ func FetchEvents(srv *calendar.Service, viewing time.Time) (map[string][]*calend
 
 	for _, item := range resp.Items {
 		date := item.Start.DateTime
-		if date == "" {
-			date = item.Start.Date // all-day event
+		var dateKey string
+		if date == "" { // all-day event
+			dateKey = item.Start.Date
+		} else {
+			t, err := time.Parse(time.RFC3339, date)
+			if err != nil {
+				log.Println("Error parsing date:", err)
+				continue
+			}
+			dateKey = t.Format("2006-01-02")
 		}
-		t, err := time.Parse(time.RFC3339, date)
-		if err != nil {
-			continue
-		}
-		dateKey := t.Format("2006-01-02")
 		events[dateKey] = append(events[dateKey], item)
 	}
 
