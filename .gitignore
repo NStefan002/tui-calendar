@@ -18,6 +18,9 @@ profile.cov
 go.work
 go.work.sum
 
+# log files
+*.log
+
 # env file
 .env
 secrets/*
