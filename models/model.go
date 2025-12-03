@@ -20,12 +20,10 @@ type model struct {
 	cm *calendarModel     // submodel containing calendar data
 	dm *eventDetailsModel // submodel for viewing event details
 	am *addEventModel     // submodel for adding new events
-	em *editEventModel    // submodel for editing existing events
 
 	calendarViewKeys     calendarViewKeyMap     // key bindings for calendar view
 	eventDetailsViewKeys eventDetailsViewKeyMap // key bindings for event details view
 	addEventViewKeys     addEventViewKeyMap     // key bindings for add event view
-	editEventViewKeys    editEventViewKeyMap    // key bindings for edit event view
 
 	help help.Model // help view model
 
@@ -52,11 +50,9 @@ func CreateModel(srv *calendar.Service) model {
 		cm:                   newCM(),
 		dm:                   newDM(),
 		am:                   newAM(),
-		em:                   newEM(),
 		calendarViewKeys:     calendarViewKeys,
 		eventDetailsViewKeys: eventDetailsViewKeys,
 		addEventViewKeys:     addEventViewKeys,
-		editEventViewKeys:    editEventViewKeys,
 		help:                 help.New(),
 		calendarService:      srv,
 		events:               make(map[string][]*calendar.Event),

@@ -137,37 +137,6 @@ var eventDetailsViewKeys = eventDetailsViewKeyMap{
 	),
 }
 
-type editEventViewKeyMap struct {
-	Quit key.Binding
-	Back key.Binding
-	Help key.Binding
-}
-
-func (k editEventViewKeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Quit, k.Back, k.Help}
-}
-
-func (k editEventViewKeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{
-		{k.Back, k.Quit, k.Help},
-	}
-}
-
-var editEventViewKeys = editEventViewKeyMap{
-	Quit: key.NewBinding(
-		key.WithKeys("q", tea.KeyCtrlC.String()),
-		key.WithHelp("q/ctrl+c", "quit"),
-	),
-	Back: key.NewBinding(
-		key.WithKeys(tea.KeyEsc.String()),
-		key.WithHelp("esc", "back to previous view"),
-	),
-	Help: key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "toggle help"),
-	),
-}
-
 type addEventViewKeyMap struct {
 	Quit       key.Binding
 	Back       key.Binding

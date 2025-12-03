@@ -54,6 +54,14 @@ func CreateEvent(srv *calendar.Service, event *calendar.Event) (*calendar.Event,
 	return createdEvent, nil
 }
 
+func UpdateEvent(srv *calendar.Service, eventID string, event *calendar.Event) (*calendar.Event, error) {
+	updatedEvent, err := srv.Events.Update("primary", eventID, event).Do()
+	if err != nil {
+		return nil, fmt.Errorf("failed to update event: %w", err)
+	}
+	return updatedEvent, nil
+}
+
 func DeleteEvent(srv *calendar.Service, eventID string) error {
 	err := srv.Events.Delete("primary", eventID).Do()
 	if err != nil {

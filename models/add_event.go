@@ -248,6 +248,32 @@ func (am *addEventModel) resetForm() {
 	am.changeFocus(0)
 }
 
+func (am *addEventModel) prefillForm(event *calendar.Event) {
+	am.titleInput.SetValue(event.Summary)
+	am.descriptionInput.SetValue(event.Description)
+	am.locationInput.SetValue(event.Location)
+
+	// check if all-day
+	if event.Start.Date != "" && event.End.Date != "" {
+		am.allDay = true
+		am.allDayInput.SetValue("✓  ")
+		am.startTimeInput.SetValue("     ")
+		am.endTimeInput.SetValue("     ")
+	} else {
+		startTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
+		if err == nil {
+			am.startTime = startTime
+			am.startTimeInput.SetValue(am.startTime.Format("15:04"))
+		}
+
+		endTime, err := time.Parse(time.RFC3339, event.End.DateTime)
+		if err == nil {
+			am.endTime = endTime
+			am.endTimeInput.SetValue(am.endTime.Format("15:04"))
+		}
+	}
+}
+
 func (am *addEventModel) initTimes() {
 	now := time.Now()
 	if am.allDay {
@@ -360,7 +386,7 @@ func (am *addEventModel) changeHours(delta int) {
 	}
 }
 
-func (am *addEventModel) submit() (*calendar.Event, error) {
+func (am *addEventModel) submitAddEventForm() (*calendar.Event, error) {
 	// gather data
 	am.title = am.titleInput.Value()
 	am.description = am.descriptionInput.Value()
@@ -421,6 +447,75 @@ func (am *addEventModel) submit() (*calendar.Event, error) {
 		End: &calendar.EventDateTime{
 			DateTime: am.endTime.Format(time.RFC3339),
 		},
+	}
+
+	return event, nil
+}
+
+func (am *addEventModel) submitEditEventForm(event *calendar.Event) (*calendar.Event, error) {
+	// gather data
+	am.title = am.titleInput.Value()
+	am.description = am.descriptionInput.Value()
+	am.location = am.locationInput.Value()
+	if am.allDay {
+		// update calendar event
+		event.Summary = am.title
+		event.Description = am.description
+		event.Location = am.location
+		event.Start = &calendar.EventDateTime{
+			Date: am.startTime.Format("2006-01-02"),
+		}
+		event.End = &calendar.EventDateTime{
+			Date: am.endTime.Format("2006-01-02"),
+		}
+
+		return event, nil
+	}
+
+	// parse start time
+	startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
+	if err != nil {
+		return nil, fmt.Errorf("invalid start time format")
+	}
+	am.startTime = time.Date(
+		am.startTime.Year(),
+		am.startTime.Month(),
+		am.startTime.Day(),
+		startParsed.Hour(),
+		startParsed.Minute(),
+		0, 0, am.startTime.Location(),
+	)
+
+	// parse end time
+	endParsed, err := time.Parse("15:04", am.endTimeInput.Value())
+	if err != nil {
+		return nil, fmt.Errorf("invalid end time format")
+	}
+	am.endTime = time.Date(
+		am.endTime.Year(),
+		am.endTime.Month(),
+		am.endTime.Day(),
+		endParsed.Hour(),
+		endParsed.Minute(),
+		0, 0, am.endTime.Location(),
+	)
+
+	// update calendar event
+	event.Summary = am.title
+	event.Description = am.description
+	event.Location = am.location
+	event.Start = &calendar.EventDateTime{
+		DateTime: am.startTime.Format(time.RFC3339),
+	}
+	event.End = &calendar.EventDateTime{
+		DateTime: am.endTime.Format(time.RFC3339),
+	}
+
+	// FIX: Explicitly set reminders to default to avoid errors like this:
+	// googleapi: Error 400: Cannot specify both default reminders and overrides at the same time., cannotUseDefaultRemindersAndSpecifyOverride
+
+	event.Reminders = &calendar.EventReminders{
+		UseDefault: true,
 	}
 
 	return event, nil

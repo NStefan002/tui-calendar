@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"tui-calendar/google"
 	"tui-calendar/utils"
 
@@ -108,6 +109,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.viewMode = editEventView
 				m.lastViewMode = eventDetailsView
 				m.help.ShowAll = false
+				m.am.selectedDate = m.cm.selected
+				m.am.prefillForm(m.events[m.cm.selected.Format("2006-01-02")][m.dm.idx])
 			case key.Matches(msg, m.eventDetailsViewKeys.AddEvent):
 				m.viewMode = addEventView
 				m.lastViewMode = eventDetailsView
@@ -140,18 +143,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				)
 			}
 
-		case editEventView:
-			switch {
-			case key.Matches(msg, m.editEventViewKeys.Quit):
-				return m, tea.Quit
-			case key.Matches(msg, m.editEventViewKeys.Back):
-				m.viewMode = m.lastViewMode
-				m.help.ShowAll = false
-			case key.Matches(msg, m.editEventViewKeys.Help):
-				m.help.ShowAll = !m.help.ShowAll
-			}
-
-		case addEventView:
+		// add event view and edit event view share same keybindings
+		case addEventView, editEventView:
 			switch {
 			case key.Matches(msg, m.addEventViewKeys.Quit):
 				return m, tea.Quit
@@ -175,17 +168,38 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case key.Matches(msg, m.addEventViewKeys.Previous):
 				m.am.changeFocus(-1)
 			case key.Matches(msg, m.addEventViewKeys.Submit):
-				event, err := m.am.submit()
-				if err != nil {
-					m.errMessage = fmt.Sprintf("Failed to submit form: %v", err)
-					m.viewMode = m.lastViewMode
-					return m, nil
-				}
-				_, err = google.CreateEvent(m.calendarService, event)
-				if err != nil {
-					m.errMessage = fmt.Sprintf("Failed to create event: %v", err)
-					m.viewMode = m.lastViewMode
-					return m, nil
+				if m.viewMode == editEventView {
+					// updating existing event
+					event := m.events[m.cm.selected.Format("2006-01-02")][m.dm.idx]
+					event, err := m.am.submitEditEventForm(event)
+					if err != nil {
+						log.Println("Failed to submit edit event form:", err)
+						m.errMessage = fmt.Sprintf("Failed to submit add event form: %v", err)
+						m.viewMode = m.lastViewMode
+						return m, nil
+					}
+
+					_, err = google.UpdateEvent(m.calendarService, event.Id, event)
+					if err != nil {
+						log.Println("Failed to update event:", err)
+						m.errMessage = fmt.Sprintf("Failed to update event: %v", err)
+						m.viewMode = m.lastViewMode
+						return m, nil
+					}
+				} else {
+					event, err := m.am.submitAddEventForm()
+					if err != nil {
+						m.errMessage = fmt.Sprintf("Failed to submit add event form: %v", err)
+						m.viewMode = m.lastViewMode
+						return m, nil
+					}
+
+					_, err = google.CreateEvent(m.calendarService, event)
+					if err != nil {
+						m.errMessage = fmt.Sprintf("Failed to create event: %v", err)
+						m.viewMode = m.lastViewMode
+						return m, nil
+					}
 				}
 				// return to calendar view after creating event
 				m.viewMode = calendarView
@@ -240,9 +254,7 @@ func (m model) View() string {
 		return m.cm.view(&m)
 	case eventDetailsView:
 		return m.dm.view(&m)
-	case editEventView:
-		return m.em.view()
-	case addEventView:
+	case addEventView, editEventView:
 		return m.am.view(&m)
 	default:
 		return "ERROR"
