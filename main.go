@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"tui-calendar/google"
 	"tui-calendar/models"
 
@@ -11,6 +12,16 @@ import (
 
 func main() {
 	_ = godotenv.Load()
+
+	// open or create log file
+	f, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	// redirect logger to the file
+	log.SetOutput(f)
 
 	srv, err := google.GetClient()
 	if err != nil {
