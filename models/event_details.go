@@ -84,6 +84,11 @@ func (dm *eventDetailsModel) view(m *model) string {
 	}
 	right.WriteString("\n" + styles.Description.Render(desc))
 
+	// location (if provided)
+	if loc := strings.TrimSpace(selected.Location); loc != "" {
+		right.WriteString("\n\n" + styles.LocationLabel.Render("Location: ") + styles.LocationValue.Render(loc))
+	}
+
 	rightCol := styles.Box.Width(50).Render(right.String())
 
 	// side-by-side layout

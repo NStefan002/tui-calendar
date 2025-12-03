@@ -103,4 +103,11 @@ var (
 	Description = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#C0C0C0")).
 			PaddingTop(1)
+
+	LocationLabel = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#AAAAAA")).
+			Bold(true)
+
+	LocationValue = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FFFFFF"))
 )
