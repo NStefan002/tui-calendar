@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"runtime"
 
@@ -19,29 +18,29 @@ import (
 	"google.golang.org/api/option"
 )
 
-var redirectURL = "http://localhost:8888/callback"
+const redirectURL = "http://localhost:8888/callback"
 
-func tokenCacheFile() (string, error) {
-	path := os.Getenv("GOOGLE_TOKEN_CACHE")
-	if path == "" {
-		return "", fmt.Errorf("GOOGLE_TOKEN_CACHE not set")
+func appConfigDir() (string, error) {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
 	}
 
-	// expand `~` to home directory
-	if len(path) >= 2 && path[:2] == "~/" {
-		usr, err := user.Current()
-		if err != nil {
-			return "", err
-		}
-		path = filepath.Join(usr.HomeDir, path[2:])
-	}
+	path := filepath.Join(dir, "tui-calendar")
 
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0700); err != nil {
+	if err := os.MkdirAll(path, 0700); err != nil {
 		return "", err
 	}
 
 	return path, nil
+}
+
+func tokenCacheFile() (string, error) {
+	cfgDir, err := appConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(cfgDir, "token.json"), nil
 }
 
 func saveToken(path string, token *oauth2.Token) error {
@@ -49,15 +48,9 @@ func saveToken(path string, token *oauth2.Token) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	encoderErr := json.NewEncoder(f).Encode(token)
-
-	err = f.Close()
-	if err != nil {
-		return err
-	}
-
-	return encoderErr
+	return json.NewEncoder(f).Encode(token)
 }
 
 func tokenFromFile(file string) (*oauth2.Token, error) {
@@ -65,26 +58,39 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	var token oauth2.Token
-	decoderErr := json.NewDecoder(f).Decode(&token)
+	defer f.Close()
 
-	err = f.Close()
+	var token oauth2.Token
+	if err := json.NewDecoder(f).Decode(&token); err != nil {
+		return nil, err
+	}
+
+	return &token, nil
+}
+
+func getOAuthConfig() (*oauth2.Config, error) {
+	cfgDir, err := appConfigDir()
 	if err != nil {
 		return nil, err
 	}
 
-	return &token, decoderErr
-}
-
-func getOAuthConfig() (*oauth2.Config, error) {
-	credPath := os.Getenv("GOOGLE_CREDENTIALS_PATH")
-	if credPath == "" {
-		return nil, fmt.Errorf("GOOGLE_CREDENTIALS_PATH not set")
-	}
+	credPath := filepath.Join(cfgDir, "credentials.json")
 
 	b, err := os.ReadFile(credPath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read credentials: %v", err)
+		return nil, fmt.Errorf(
+			`Missing credentials.json.
+
+To use tui-calendar, you must download your own Google OAuth desktop credentials.
+
+Steps:
+1. Go to https://console.cloud.google.com/apis/credentials
+2. Create OAuth client ID → "Desktop App"
+3. Download JSON file
+4. Save it here:
+   %s
+
+After placing credentials.json, run tui-calendar again.`, credPath)
 	}
 
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
@@ -96,7 +102,6 @@ func getOAuthConfig() (*oauth2.Config, error) {
 	return config, nil
 }
 
-// starts the local OAuth server and waits for token exchange
 func waitForWebLogin(config *oauth2.Config) (*oauth2.Token, error) {
 	codeCh := make(chan string)
 	mux := http.NewServeMux()
@@ -105,12 +110,9 @@ func waitForWebLogin(config *oauth2.Config) (*oauth2.Token, error) {
 		code := r.URL.Query().Get("code")
 		pageBytes, err := os.ReadFile("assets/login_successful.html")
 		if err != nil {
-			http.Error(w, "Login successful, but failed to load page.", http.StatusInternalServerError)
-			log.Printf("failed to load login success page: %v", err)
+			http.Error(w, "Login successful, but failed to load local HTML.", http.StatusInternalServerError)
 		} else {
-			if _, err := w.Write(pageBytes); err != nil {
-				log.Printf("failed to write response: %v", err)
-			}
+			w.Write(pageBytes)
 		}
 
 		codeCh <- code
@@ -132,6 +134,7 @@ func waitForWebLogin(config *oauth2.Config) (*oauth2.Token, error) {
 
 	// open browser
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	fmt.Printf("Opening browser for authentication. If it does not open, please visit the following URL:\n%s\n", authURL)
 	if err := openBrowser(authURL); err != nil {
 		return nil, fmt.Errorf("failed to open browser: %v", err)
 	}
@@ -141,10 +144,9 @@ func waitForWebLogin(config *oauth2.Config) (*oauth2.Token, error) {
 
 	// shutdown server
 	if err := server.Shutdown(context.Background()); err != nil {
-		log.Printf("server shutdown error: %v", err)
+		return nil, fmt.Errorf("failed to shutdown server: %v", err)
 	}
 
-	// exchange code for token
 	token, err := config.Exchange(context.Background(), code)
 	if err != nil {
 		return nil, fmt.Errorf("token exchange failed: %v", err)
@@ -185,23 +187,18 @@ func GetClient() (*calendar.Service, error) {
 	}
 
 	var tok *oauth2.Token
-	tok, err = tokenFromFile(tokFile)
-	if err != nil {
-		// generate new token
+
+	if tok, err = tokenFromFile(tokFile); err != nil {
 		tok, err = waitForWebLogin(config)
 		if err != nil {
 			return nil, err
 		}
-		err = saveToken(tokFile, tok)
-		if err != nil {
+		if err := saveToken(tokFile, tok); err != nil {
 			return nil, err
 		}
 	}
 
 	client := config.Client(ctx, tok)
-	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
-	if err != nil {
-		return nil, fmt.Errorf("unable to create calendar service: %v", err)
-	}
-	return srv, nil
+
+	return calendar.NewService(ctx, option.WithHTTPClient(client))
 }

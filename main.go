@@ -8,12 +8,9 @@ import (
 	"github.com/NStefan002/tui-calendar/models"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	_ = godotenv.Load()
-
 	// open or create log file
 	f, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
