@@ -78,7 +78,7 @@ func getOAuthConfig() (*oauth2.Config, error) {
 
 	b, err := os.ReadFile(credPath)
 	if err != nil {
-		return nil, fmt.Errorf(
+		fmt.Printf(
 			`Missing credentials.json.
 
 To use tui-calendar, you must download your own Google OAuth desktop credentials.
@@ -90,7 +90,10 @@ Steps:
 4. Save it here:
    %s
 
-After placing credentials.json, run tui-calendar again.`, credPath)
+After placing credentials.json, run tui-calendar again.
+
+Exiting...`, credPath)
+		return nil, fmt.Errorf("unable to read credentials file: %v", err)
 	}
 
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
