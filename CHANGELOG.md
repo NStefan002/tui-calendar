@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/NStefan002/tui-calendar/compare/v1.0.0...v1.0.1) (2025-12-06)
+
+
+### Bug Fixes
+
+* update project name in go.mod ([a0882d3](https://github.com/NStefan002/tui-calendar/commit/a0882d35fe381e6c9bd1dc7e654289b71592a7c9))
+
 ## 1.0.0 (2025-12-04)
 
 
