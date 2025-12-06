@@ -24,7 +24,9 @@ go build -o tui-calendar .
 
 ## First-time Setup (Google OAuth)
 
-> [!NOTE] This step is only required the first time you run `tui-calendar`, after that your credentials will be saved
+<!-- prettier-ignore -->
+> [!NOTE]
+> This step is only required the first time you run `tui-calendar`, after that your credentials will be saved
 > locally and you will never have to do this again.
 
 `tui-calendar` uses your Google Calendar, so the first time you run it you need to provide your own Google OAuth
