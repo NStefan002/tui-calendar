@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"os"
-	"tui-calendar/google"
-	"tui-calendar/models"
+	"github.com/NStefan002/tui-calendar/google"
+	"github.com/NStefan002/tui-calendar/models"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/joho/godotenv"

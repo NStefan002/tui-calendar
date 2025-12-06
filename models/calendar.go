@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 	"time"
-	"tui-calendar/styles"
-	"tui-calendar/utils"
+	"github.com/NStefan002/tui-calendar/styles"
+	"github.com/NStefan002/tui-calendar/utils"
 
 	"github.com/charmbracelet/lipgloss"
 )

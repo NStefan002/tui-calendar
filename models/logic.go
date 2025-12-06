@@ -3,8 +3,8 @@ package models
 import (
 	"fmt"
 	"log"
-	"tui-calendar/google"
-	"tui-calendar/utils"
+	"github.com/NStefan002/tui-calendar/google"
+	"github.com/NStefan002/tui-calendar/utils"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
