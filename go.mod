@@ -1,4 +1,4 @@
-module tui-calendar
+module github.com/NStefan002/tui-calendar
 
 go 1.23.1
 
