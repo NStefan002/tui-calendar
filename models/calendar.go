@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 	"time"
+
 	"github.com/NStefan002/tui-calendar/styles"
 	"github.com/NStefan002/tui-calendar/utils"
 

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+
 	"github.com/NStefan002/tui-calendar/google"
 	"github.com/NStefan002/tui-calendar/models"
 

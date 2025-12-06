@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"log"
+
 	"github.com/NStefan002/tui-calendar/google"
 	"github.com/NStefan002/tui-calendar/utils"
 
