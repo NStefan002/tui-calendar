@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/NStefan002/tui-calendar/compare/v1.0.1...v1.0.2) (2025-12-06)
+
+
+### Bug Fixes
+
+* import path ([c8afed5](https://github.com/NStefan002/tui-calendar/commit/c8afed51182ad1e4a4ad8fbeab7ceed281cafb35))
+
 ## [1.0.1](https://github.com/NStefan002/tui-calendar/compare/v1.0.0...v1.0.1) (2025-12-06)
 
 
