@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/NStefan002/tui-calendar/google"
-	"github.com/NStefan002/tui-calendar/models"
+	"github.com/NStefan002/tui-calendar/v2/google"
+	"github.com/NStefan002/tui-calendar/v2/models"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

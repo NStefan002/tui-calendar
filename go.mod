@@ -1,4 +1,4 @@
-module github.com/NStefan002/tui-calendar
+module github.com/NStefan002/tui-calendar/v2
 
 go 1.23.1
 
@@ -6,7 +6,6 @@ require (
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/joho/godotenv v1.5.1
 	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.239.0
 )

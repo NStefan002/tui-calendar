@@ -10,8 +10,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 
-	"github.com/NStefan002/tui-calendar/styles"
-	"github.com/NStefan002/tui-calendar/utils"
+	"github.com/NStefan002/tui-calendar/v2/styles"
+	"github.com/NStefan002/tui-calendar/v2/utils"
 )
 
 type addEventModel struct {

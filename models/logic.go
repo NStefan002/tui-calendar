@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/NStefan002/tui-calendar/google"
-	"github.com/NStefan002/tui-calendar/utils"
+	"github.com/NStefan002/tui-calendar/v2/google"
+	"github.com/NStefan002/tui-calendar/v2/utils"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
