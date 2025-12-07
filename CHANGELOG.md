@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/NStefan002/tui-calendar/compare/v2.0.0...v2.0.1) (2025-12-07)
+
+
+### Bug Fixes
+
+* update `go.sum` ([935cc9a](https://github.com/NStefan002/tui-calendar/commit/935cc9a0fbae2eec7ac96d6361b318fe3275688c))
+
 ## [2.0.0](https://github.com/NStefan002/tui-calendar/compare/v1.0.2...v2.0.0) (2025-12-07)
 
 
