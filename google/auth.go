@@ -20,7 +20,7 @@ import (
 
 const redirectURL = "http://localhost:8888/callback"
 
-func appConfigDir() (string, error) {
+func AppConfigDir() (string, error) {
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
@@ -36,7 +36,7 @@ func appConfigDir() (string, error) {
 }
 
 func tokenCacheFile() (string, error) {
-	cfgDir, err := appConfigDir()
+	cfgDir, err := AppConfigDir()
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 func getOAuthConfig() (*oauth2.Config, error) {
-	cfgDir, err := appConfigDir()
+	cfgDir, err := AppConfigDir()
 	if err != nil {
 		return nil, err
 	}
@@ -78,21 +78,7 @@ func getOAuthConfig() (*oauth2.Config, error) {
 
 	b, err := os.ReadFile(credPath)
 	if err != nil {
-		fmt.Printf(
-			`Missing credentials.json.
-
-To use tui-calendar, you must download your own Google OAuth desktop credentials.
-
-Steps:
-1. Go to https://console.cloud.google.com/apis/credentials
-2. Create OAuth client ID → "Desktop App"
-3. Download JSON file
-4. Save it here:
-   %s
-
-After placing credentials.json, run tui-calendar again.
-
-Exiting...`, credPath)
+		fmt.Println("First time running tui-calendar? Run `tui-calendar init`.")
 		return nil, fmt.Errorf("unable to read credentials file: %v", err)
 	}
 
