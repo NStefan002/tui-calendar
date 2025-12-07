@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/NStefan002/tui-calendar/compare/v1.0.2...v2.0.0) (2025-12-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* ask each user to create their own credentials file
+
+### Features
+
+* add `init` subcommand with detailed instructions ([0777e94](https://github.com/NStefan002/tui-calendar/commit/0777e94750d800c792b552d314bc60774ee8fddb))
+* ask each user to create their own credentials file ([b0e34dd](https://github.com/NStefan002/tui-calendar/commit/b0e34dd979cb0bd37a352ee173f5c85f6f31ec66))
+
+
+### Bug Fixes
+
+* print credentials help to `stdout` ([ac534ca](https://github.com/NStefan002/tui-calendar/commit/ac534ca5c99229e1a45223623ad05ba4360eaaa1))
+
 ## [1.0.2](https://github.com/NStefan002/tui-calendar/compare/v1.0.1...v1.0.2) (2025-12-06)
 
 
