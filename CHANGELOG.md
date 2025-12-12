@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/NStefan002/tui-calendar/compare/v2.0.1...v2.1.0) (2025-12-12)
+
+
+### Features
+
+* center events header and fill entire width ([77c8ad2](https://github.com/NStefan002/tui-calendar/commit/77c8ad269d6751619378bd8ff067a41dec5ad327))
+
 ## [2.0.1](https://github.com/NStefan002/tui-calendar/compare/v2.0.0...v2.0.1) (2025-12-07)
 
 
