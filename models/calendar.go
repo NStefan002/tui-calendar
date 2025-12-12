@@ -34,9 +34,17 @@ func (cm *calendarModel) view(m *model) string {
 
 	// days of the week (Mon-Sun)
 	daysOfWeek := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
-	for _, day := range daysOfWeek {
-		sb.WriteString(styles.Base.Render(fmt.Sprintf("%3s", day)) + " ")
+	var daysLineBuilder strings.Builder
+	for i, day := range daysOfWeek {
+		if i > 0 {
+			daysLineBuilder.WriteString(" ")
+		}
+		daysLineBuilder.WriteString(styles.Base.Render(fmt.Sprintf("%3s", day)))
 	}
+	daysLine := daysLineBuilder.String()
+	daysLineWidth := lipgloss.Width(daysLine)
+
+	sb.WriteString(daysLine)
 	sb.WriteString("\n\n")
 
 	firstDay := time.Date(cm.viewing.Year(), cm.viewing.Month(), 1, 0, 0, 0, 0, cm.viewing.Location())
@@ -77,7 +85,22 @@ func (cm *calendarModel) view(m *model) string {
 	// display events (if any) for the selected date
 	dateKey := cm.selected.Format("2006-01-02")
 	if events, ok := m.events[dateKey]; ok && len(events) > 0 {
-		eventsHeader := styles.EventHeader.Render("Events for " + cm.selected.Format("January 2, 2006"))
+		eventsHeaderStr := "Events for " + cm.selected.Format("January 2, 2006")
+		eventsHeader := styles.EventHeader.Render(eventsHeaderStr)
+		ehWidth := lipgloss.Width(eventsHeader)
+		if ehWidth < daysLineWidth {
+			totalPad := daysLineWidth - ehWidth
+			leftPad := totalPad / 2
+			rightPad := totalPad - leftPad
+			// pad the raw string, then re-render and check width again
+			eventsHeaderStr = strings.Repeat(" ", leftPad) + eventsHeaderStr + strings.Repeat(" ", rightPad)
+			eventsHeader = styles.EventHeader.Render(eventsHeaderStr)
+			// if still not enough (due to style width), pad right until it matches or exceeds
+			for lipgloss.Width(eventsHeader) < daysLineWidth {
+				eventsHeaderStr += " "
+				eventsHeader = styles.EventHeader.Render(eventsHeaderStr)
+			}
+		}
 		sb.WriteString("\n\n\n" + eventsHeader + "\n")
 		for _, event := range events {
 			eventTimeStr := ""
@@ -98,8 +121,40 @@ func (cm *calendarModel) view(m *model) string {
 			} else {
 				titleStr = event.Summary
 			}
+
+			minGap := 2
+			maxLineWidth := lipgloss.Width(eventsHeaderStr)
+			timeWidth := lipgloss.Width(eventTimeStr)
+			ellipsis := "..."
+
+			// Start with full title
 			eventTitle := styles.Event.Render(titleStr)
-			eventTimeTitleGap := strings.Repeat(" ", lipgloss.Width(eventsHeader)-lipgloss.Width(eventTimeStr)-lipgloss.Width(eventTitle))
+			titleWidth := lipgloss.Width(eventTitle)
+			available := maxLineWidth - timeWidth - minGap
+
+			// Truncate if needed
+			if titleWidth > available {
+				rawTitle := titleStr
+				// Remove runes until it fits, then add ellipsis
+				runes := []rune(rawTitle)
+				for len(runes) > 0 {
+					trunc := string(runes) + ellipsis
+					truncTitle := styles.Event.Render(trunc)
+					if lipgloss.Width(truncTitle) <= available {
+						eventTitle = truncTitle
+						break
+					}
+					runes = runes[:len(runes)-1]
+				}
+				// If nothing fits, just show ellipsis
+				if len(runes) == 0 {
+					eventTitle = styles.Event.Render(ellipsis)
+				}
+			}
+
+			// Calculate gap (at least 2 spaces)
+			gap := max(maxLineWidth-timeWidth-lipgloss.Width(eventTitle), minGap)
+			eventTimeTitleGap := strings.Repeat(" ", gap)
 			sb.WriteString(fmt.Sprintf("\n%s%s%s", eventTimeStr, eventTimeTitleGap, eventTitle))
 		}
 	}
