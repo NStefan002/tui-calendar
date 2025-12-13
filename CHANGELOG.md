@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/NStefan002/tui-calendar/compare/v2.1.0...v2.2.0) (2025-12-13)
+
+
+### Features
+
+* `repeat event` functionality ([e779002](https://github.com/NStefan002/tui-calendar/commit/e77900240a34015aa571f4c02686ee685b77aa17))
+
 ## [2.1.0](https://github.com/NStefan002/tui-calendar/compare/v2.0.1...v2.1.0) (2025-12-12)
 
 
