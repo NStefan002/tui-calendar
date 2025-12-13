@@ -17,7 +17,7 @@ func main() {
 		return
 	}
 
-	// normal app launch
+	// open log file
 	f, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)

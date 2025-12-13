@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -14,6 +15,16 @@ import (
 	"github.com/NStefan002/tui-calendar/v2/utils"
 )
 
+type repeatOption int
+
+const (
+	No repeatOption = iota
+	Daily
+	Weekly
+	Monthly
+	Yearly
+)
+
 type addEventModel struct {
 	titleInput       textinput.Model // 0
 	descriptionInput textarea.Model  // 1
@@ -21,6 +32,7 @@ type addEventModel struct {
 	endTimeInput     textinput.Model // 3
 	locationInput    textinput.Model // 4
 	allDayInput      textinput.Model // 5
+	repeatInput      textinput.Model // 6
 
 	title       string
 	description string
@@ -28,6 +40,7 @@ type addEventModel struct {
 	endTime     time.Time
 	location    string
 	allDay      bool
+	repeat      repeatOption
 
 	selectedDate time.Time
 
@@ -42,11 +55,13 @@ func newAM() *addEventModel {
 		endTimeInput:     textinput.New(),
 		locationInput:    textinput.New(),
 		allDayInput:      textinput.New(),
+		repeatInput:      textinput.New(),
 
 		title:       "",
 		description: "",
 		location:    "",
 		allDay:      false,
+		repeat:      No,
 
 		idx: 0,
 	}
@@ -97,6 +112,12 @@ func newAM() *addEventModel {
 	am.allDayInput.PromptStyle = styles.InactiveTextinput
 	am.allDayInput.TextStyle = styles.InactiveTextinput
 
+	// --- Repeat ---
+	am.repeatInput.Prompt = ""
+	am.repeatInput.SetValue("[no] |  daily  |  weekly  |  monthly  |  yearly  ")
+	am.repeatInput.PromptStyle = styles.InactiveTextinput
+	am.repeatInput.TextStyle = styles.InactiveTextinput
+
 	return am
 }
 
@@ -109,41 +130,18 @@ func (am *addEventModel) view(m *model) string {
 
 	formFields := []string{
 		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Title:"), am.titleInput.View()),
-
 		"\n",
-
 		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Description:"), am.descriptionInput.View()),
-
 		"\n",
-
-		lipgloss.JoinHorizontal(lipgloss.Top,
-			styles.FieldLabel.Render("Start:"),
-			am.startTimeInput.View(),
-		),
-
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Start:"), am.startTimeInput.View()),
 		"\n",
-
-		lipgloss.JoinHorizontal(lipgloss.Top,
-			styles.FieldLabel.Render("End:"),
-			am.endTimeInput.View(),
-		),
-
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("End:"), am.endTimeInput.View()),
 		"\n",
-
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			styles.FieldLabel.Render("Location:"),
-			am.locationInput.View(),
-		),
-
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Location:"), am.locationInput.View()),
 		"\n",
-
-		// All-day toggle
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			styles.FieldLabel.Render("All-day:"),
-			am.allDayInput.View(),
-		),
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("All-day:"), am.allDayInput.View()),
+		"\n",
+		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Repeat:"), am.repeatInput.View()),
 	}
 
 	form := lipgloss.JoinVertical(lipgloss.Left, formFields...)
@@ -167,6 +165,10 @@ func (am *addEventModel) checkBoxFocused() bool {
 
 func (am *addEventModel) timeFieldFocused() bool {
 	return am.idx == 2 || am.idx == 3
+}
+
+func (am *addEventModel) repeatFieldFocused() bool {
+	return am.idx == 6
 }
 
 // Rotates focus between fields 0..5
@@ -199,9 +201,13 @@ func (am *addEventModel) changeFocus(direction int) {
 		am.allDayInput.Blur()
 		am.allDayInput.PromptStyle = styles.InactiveTextinput
 		am.allDayInput.TextStyle = styles.InactiveTextinput
+	case 6:
+		am.repeatInput.Blur()
+		am.repeatInput.PromptStyle = styles.InactiveTextinput
+		am.repeatInput.TextStyle = styles.InactiveTextinput
 	}
 
-	am.idx = (am.idx + direction + 6) % 6
+	am.idx = (am.idx + direction + 7) % 7
 
 	// focus new
 	switch am.idx {
@@ -231,6 +237,10 @@ func (am *addEventModel) changeFocus(direction int) {
 		am.allDayInput.Focus()
 		am.allDayInput.PromptStyle = styles.ActiveTextinput
 		am.allDayInput.TextStyle = styles.ActiveTextinput
+	case 6:
+		am.repeatInput.Focus()
+		am.repeatInput.PromptStyle = styles.ActiveTextinput
+		am.repeatInput.TextStyle = styles.ActiveTextinput
 	}
 }
 
@@ -240,6 +250,8 @@ func (am *addEventModel) resetForm() {
 	am.locationInput.SetValue("")
 	am.allDay = false
 	am.allDayInput.SetValue("   ")
+	am.repeat = No
+	am.repeatInput.SetValue("[no] |  daily  |  weekly  |  monthly  |  yearly  ")
 	am.initTimes()
 	am.idx = 0
 	am.title = ""
@@ -386,14 +398,87 @@ func (am *addEventModel) changeHours(delta int) {
 	}
 }
 
+func (am *addEventModel) repeatToRRule() string {
+	switch am.repeat {
+	case Daily:
+		return "RRULE:FREQ=DAILY"
+	case Weekly:
+		return "RRULE:FREQ=WEEKLY"
+	case Monthly:
+		return "RRULE:FREQ=MONTHLY"
+	case Yearly:
+		return "RRULE:FREQ=YEARLY"
+	}
+	return ""
+}
+
+func (am *addEventModel) updateRepeatOpts(inc int) {
+	if am.idx != 6 {
+		return
+	}
+	switch am.repeat {
+	case No:
+		if inc == 1 {
+			am.repeat = Daily
+		} else {
+			am.repeat = Yearly
+		}
+	case Daily:
+		if inc == 1 {
+			am.repeat = Weekly
+		} else {
+			am.repeat = No
+		}
+	case Weekly:
+		if inc == 1 {
+			am.repeat = Monthly
+		} else {
+			am.repeat = Daily
+		}
+	case Monthly:
+		if inc == 1 {
+			am.repeat = Yearly
+		} else {
+			am.repeat = Weekly
+		}
+	case Yearly:
+		if inc == 1 {
+			am.repeat = No
+		} else {
+			am.repeat = Monthly
+		}
+	}
+
+	// TODO: style nicer
+	am.repeatInput.SetValue(func() string {
+		log.Println(am.repeat)
+		switch am.repeat {
+		case Daily:
+			return " no  | [daily] |  weekly  |  monthly  |  yearly  "
+		case Weekly:
+			return " no  |  daily  | [weekly] |  monthly  |  yearly  "
+		case Monthly:
+			return " no  |  daily  |  weekly  | [monthly] |  yearly  "
+		case Yearly:
+			return " no  |  daily  |  weekly  |  monthly  | [yearly] "
+		default:
+			return "[no] |  daily  |  weekly  |  monthly  |  yearly  "
+		}
+	}())
+}
+
 func (am *addEventModel) submitAddEventForm() (*calendar.Event, error) {
-	// gather data
 	am.title = am.titleInput.Value()
 	am.description = am.descriptionInput.Value()
 	am.location = am.locationInput.Value()
-	if am.allDay {
-		// create calendar event
-		event := &calendar.Event{
+
+	rrule := am.repeatToRRule()
+	hasRepeat := rrule != ""
+
+	// handle all-day
+	if am.allDay && !hasRepeat {
+		// Valid all-day, because RRULE is NOT present
+		return &calendar.Event{
 			Summary:     am.title,
 			Description: am.description,
 			Location:    am.location,
@@ -403,65 +488,79 @@ func (am *addEventModel) submitAddEventForm() (*calendar.Event, error) {
 			End: &calendar.EventDateTime{
 				Date: am.endTime.Format("2006-01-02"),
 			},
+		}, nil
+	}
+
+	// if RRULE exists we cannot use all-day so we need to convert it to midnight-based time
+	if am.allDay && hasRepeat {
+		am.startTime = time.Date(
+			am.startTime.Year(), am.startTime.Month(), am.startTime.Day(),
+			0, 0, 0, 0, am.startTime.Location(),
+		)
+		am.endTime = am.startTime.Add(24 * time.Hour)
+	}
+
+	// parse times (for non-all-day)
+	if !am.allDay {
+		startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
+		if err != nil {
+			return nil, fmt.Errorf("invalid start time format")
 		}
+		am.startTime = time.Date(
+			am.startTime.Year(), am.startTime.Month(), am.startTime.Day(),
+			startParsed.Hour(), startParsed.Minute(),
+			0, 0, am.startTime.Location(),
+		)
 
-		return event, nil
+		endParsed, err := time.Parse("15:04", am.endTimeInput.Value())
+		if err != nil {
+			return nil, fmt.Errorf("invalid end time format")
+		}
+		am.endTime = time.Date(
+			am.endTime.Year(), am.endTime.Month(), am.endTime.Day(),
+			endParsed.Hour(), endParsed.Minute(),
+			0, 0, am.endTime.Location(),
+		)
 	}
 
-	// parse start time
-	startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
-	if err != nil {
-		return nil, fmt.Errorf("invalid start time format")
-	}
-	am.startTime = time.Date(
-		am.startTime.Year(),
-		am.startTime.Month(),
-		am.startTime.Day(),
-		startParsed.Hour(),
-		startParsed.Minute(),
-		0, 0, am.startTime.Location(),
-	)
+	tz, _ := time.Now().Local().Zone()
 
-	// parse end time
-	endParsed, err := time.Parse("15:04", am.endTimeInput.Value())
-	if err != nil {
-		return nil, fmt.Errorf("invalid end time format")
-	}
-	am.endTime = time.Date(
-		am.endTime.Year(),
-		am.endTime.Month(),
-		am.endTime.Day(),
-		endParsed.Hour(),
-		endParsed.Minute(),
-		0, 0, am.endTime.Location(),
-	)
-
-	// create calendar event
+	// build event
 	event := &calendar.Event{
 		Summary:     am.title,
 		Description: am.description,
 		Location:    am.location,
 		Start: &calendar.EventDateTime{
 			DateTime: am.startTime.Format(time.RFC3339),
+			TimeZone: tz,
 		},
 		End: &calendar.EventDateTime{
 			DateTime: am.endTime.Format(time.RFC3339),
+			TimeZone: tz,
 		},
+	}
+
+	if hasRepeat {
+		event.Recurrence = []string{rrule}
 	}
 
 	return event, nil
 }
 
 func (am *addEventModel) submitEditEventForm(event *calendar.Event) (*calendar.Event, error) {
-	// gather data
 	am.title = am.titleInput.Value()
 	am.description = am.descriptionInput.Value()
 	am.location = am.locationInput.Value()
-	if am.allDay {
-		// update calendar event
+
+	rrule := am.repeatToRRule()
+	hasRepeat := rrule != ""
+
+	// handle all-day
+	if am.allDay && !hasRepeat {
 		event.Summary = am.title
 		event.Description = am.description
 		event.Location = am.location
+
 		event.Start = &calendar.EventDateTime{
 			Date: am.startTime.Format("2006-01-02"),
 		}
@@ -469,50 +568,64 @@ func (am *addEventModel) submitEditEventForm(event *calendar.Event) (*calendar.E
 			Date: am.endTime.Format("2006-01-02"),
 		}
 
+		event.Recurrence = nil
+		event.Reminders = &calendar.EventReminders{UseDefault: true}
 		return event, nil
 	}
 
-	// parse start time
-	startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
-	if err != nil {
-		return nil, fmt.Errorf("invalid start time format")
+	// if RRULE exists we cannot use all-day so we need to convert it to midnight-based time
+	if am.allDay && hasRepeat {
+		am.startTime = time.Date(
+			am.startTime.Year(), am.startTime.Month(), am.startTime.Day(),
+			0, 0, 0, 0, am.startTime.Location(),
+		)
+		am.endTime = am.startTime.Add(24 * time.Hour)
 	}
-	am.startTime = time.Date(
-		am.startTime.Year(),
-		am.startTime.Month(),
-		am.startTime.Day(),
-		startParsed.Hour(),
-		startParsed.Minute(),
-		0, 0, am.startTime.Location(),
-	)
 
-	// parse end time
-	endParsed, err := time.Parse("15:04", am.endTimeInput.Value())
-	if err != nil {
-		return nil, fmt.Errorf("invalid end time format")
+	// parse time fields (if not all-day)
+	if !am.allDay {
+		startParsed, err := time.Parse("15:04", am.startTimeInput.Value())
+		if err != nil {
+			return nil, fmt.Errorf("invalid start time format")
+		}
+		am.startTime = time.Date(
+			am.startTime.Year(), am.startTime.Month(), am.startTime.Day(),
+			startParsed.Hour(), startParsed.Minute(),
+			0, 0, am.startTime.Location(),
+		)
+
+		endParsed, err := time.Parse("15:04", am.endTimeInput.Value())
+		if err != nil {
+			return nil, fmt.Errorf("invalid end time format")
+		}
+		am.endTime = time.Date(
+			am.endTime.Year(), am.endTime.Month(), am.endTime.Day(),
+			endParsed.Hour(), endParsed.Minute(),
+			0, 0, am.endTime.Location(),
+		)
 	}
-	am.endTime = time.Date(
-		am.endTime.Year(),
-		am.endTime.Month(),
-		am.endTime.Day(),
-		endParsed.Hour(),
-		endParsed.Minute(),
-		0, 0, am.endTime.Location(),
-	)
 
-	// update calendar event
+	// update event
 	event.Summary = am.title
 	event.Description = am.description
 	event.Location = am.location
+
+	tz, _ := time.Now().Local().Zone()
+
 	event.Start = &calendar.EventDateTime{
 		DateTime: am.startTime.Format(time.RFC3339),
+		TimeZone: tz,
 	}
 	event.End = &calendar.EventDateTime{
 		DateTime: am.endTime.Format(time.RFC3339),
+		TimeZone: tz,
 	}
 
-	// FIX: Explicitly set reminders to default to avoid errors like this:
-	// googleapi: Error 400: Cannot specify both default reminders and overrides at the same time., cannotUseDefaultRemindersAndSpecifyOverride
+	if hasRepeat {
+		event.Recurrence = []string{rrule}
+	} else {
+		event.Recurrence = nil
+	}
 
 	event.Reminders = &calendar.EventReminders{
 		UseDefault: true,

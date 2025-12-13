@@ -164,9 +164,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.am.changeHours(+1)
 			case key.Matches(msg, m.addEventViewKeys.HourDown) && m.am.timeFieldFocused():
 				m.am.changeHours(-1)
-			case key.Matches(msg, m.addEventViewKeys.Next):
+			case key.Matches(msg, m.addEventViewKeys.NextRepeatOpt) && m.am.repeatFieldFocused():
+				m.am.updateRepeatOpts(+1)
+			case key.Matches(msg, m.addEventViewKeys.PrevRepeatOpt) && m.am.repeatFieldFocused():
+				m.am.updateRepeatOpts(-1)
+			case key.Matches(msg, m.addEventViewKeys.NextField):
 				m.am.changeFocus(+1)
-			case key.Matches(msg, m.addEventViewKeys.Previous):
+			case key.Matches(msg, m.addEventViewKeys.PreviousField):
 				m.am.changeFocus(-1)
 			case key.Matches(msg, m.addEventViewKeys.Submit):
 				if m.viewMode == editEventView {

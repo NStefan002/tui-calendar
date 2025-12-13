@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	// "github.com/charmbracelet/bubbles/help"
 )
 
 type calendarViewKeyMap struct {
@@ -138,17 +137,19 @@ var eventDetailsViewKeys = eventDetailsViewKeyMap{
 }
 
 type addEventViewKeyMap struct {
-	Quit       key.Binding
-	Back       key.Binding
-	Help       key.Binding
-	MinuteUp   key.Binding
-	MinuteDown key.Binding
-	HourUp     key.Binding
-	HourDown   key.Binding
-	Check      key.Binding
-	Next       key.Binding
-	Previous   key.Binding
-	Submit     key.Binding
+	Quit          key.Binding
+	Back          key.Binding
+	Help          key.Binding
+	MinuteUp      key.Binding
+	MinuteDown    key.Binding
+	HourUp        key.Binding
+	HourDown      key.Binding
+	NextRepeatOpt key.Binding
+	PrevRepeatOpt key.Binding
+	Check         key.Binding
+	NextField     key.Binding
+	PreviousField key.Binding
+	Submit        key.Binding
 }
 
 func (k addEventViewKeyMap) ShortHelp() []key.Binding {
@@ -157,8 +158,9 @@ func (k addEventViewKeyMap) ShortHelp() []key.Binding {
 
 func (k addEventViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Next, k.Previous},
+		{k.NextField, k.PreviousField},
 		{k.MinuteUp, k.MinuteDown, k.HourUp, k.HourDown},
+		{k.NextRepeatOpt, k.PrevRepeatOpt},
 		{k.Check, k.Submit},
 		{k.Back, k.Quit, k.Help},
 	}
@@ -193,15 +195,23 @@ var addEventViewKeys = addEventViewKeyMap{
 		key.WithKeys("alt+down", "j"),
 		key.WithHelp("alt+↓/j", "decrease hours"),
 	),
+	NextRepeatOpt: key.NewBinding(
+		key.WithKeys("l", tea.KeyRight.String()),
+		key.WithHelp("l/→", "next recurrence"),
+	),
+	PrevRepeatOpt: key.NewBinding(
+		key.WithKeys("h", tea.KeyLeft.String()),
+		key.WithHelp("h/←", "previous recurrence"),
+	),
 	Check: key.NewBinding(
 		key.WithKeys(tea.KeyEnter.String(), tea.KeySpace.String()),
 		key.WithHelp("enter/space", "toggle all-day event"),
 	),
-	Next: key.NewBinding(
+	NextField: key.NewBinding(
 		key.WithKeys(tea.KeyTab.String(), tea.KeyDown.String(), tea.KeyCtrlN.String()),
 		key.WithHelp("tab/↓/ctrl+n", "next field"),
 	),
-	Previous: key.NewBinding(
+	PreviousField: key.NewBinding(
 		key.WithKeys(tea.KeyShiftTab.String(), tea.KeyUp.String(), tea.KeyCtrlP.String()),
 		key.WithHelp("shift+tab/↑/ctrl+p", "previous field"),
 	),
