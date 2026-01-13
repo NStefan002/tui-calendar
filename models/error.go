@@ -8,7 +8,7 @@ import (
 )
 
 func errorView(m *model) string {
-content := lipgloss.JoinVertical(
+	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		styles.ErrorTitleStyle.Render("⚠ An error occurred"),
 		"",
