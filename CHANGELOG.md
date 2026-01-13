@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.2.0](https://github.com/NStefan002/tui-calendar/compare/v2.1.0...v2.2.0) (2026-01-13)
+
+
+### Features
+
+* `repeat event` functionality ([e779002](https://github.com/NStefan002/tui-calendar/commit/e77900240a34015aa571f4c02686ee685b77aa17))
+* add error view for nicer display of errors ([35312df](https://github.com/NStefan002/tui-calendar/commit/35312dfea279656cbd8202a743808cb266140bc5))
+* store log file in temporary directory ([fc67a66](https://github.com/NStefan002/tui-calendar/commit/fc67a66caf785966db67229dfa998cca1d85ffb2))
+
 ## [2.1.0](https://github.com/NStefan002/tui-calendar/compare/v2.0.1...v2.1.0) (2025-12-12)
 
 
