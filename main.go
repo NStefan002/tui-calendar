@@ -18,7 +18,8 @@ func main() {
 	}
 
 	// open log file
-	f, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	log_file := os.TempDir() + "/tui-calendar.log"
+	f, err := os.OpenFile(log_file, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
