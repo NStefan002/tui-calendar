@@ -110,4 +110,19 @@ var (
 
 	LocationValue = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#FFFFFF"))
+
+	ErrorBoxStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("1")).
+			Padding(1, 2).
+			Width(60).
+			Align(lipgloss.Left)
+
+	ErrorTitleStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("1"))
+
+	ErrorHintStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("8")).
+			MarginTop(1)
 )

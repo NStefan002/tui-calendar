@@ -47,6 +47,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.errMessage = msg.Error()
 
 	case tea.KeyMsg:
+		if m.errMessage != "" {
+			m.errMessage = ""
+			return m, nil
+		}
 		switch m.viewMode {
 		case calendarView:
 			switch {
@@ -251,7 +255,8 @@ func (m model) View() string {
 	}
 
 	if len(m.errMessage) > 0 {
-		return "There was an error: " + m.errMessage
+		// return "There was an error: " + m.errMessage
+		return errorView(&m)
 	}
 
 	switch m.viewMode {
