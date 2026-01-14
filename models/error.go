@@ -7,16 +7,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func errorView(m *model) string {
+func errorView(errMsg string, scrWidth int) string {
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		styles.ErrorTitleStyle.Render("⚠ An error occurred"),
 		"",
-		m.errMessage,
+		errMsg,
 		styles.ErrorHintStyle.Render("Press any key to continue"),
 	)
 
 	box := styles.ErrorBoxStyle.Render(content)
 
-	return utils.CenterText(box, m.screenWidth)
+	return utils.CenterText(box, scrWidth)
 }
