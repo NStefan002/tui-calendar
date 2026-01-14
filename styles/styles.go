@@ -125,4 +125,23 @@ var (
 	ErrorHintStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("8")).
 			MarginTop(1)
+
+	InitBox = lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		Padding(1, 2).
+		Width(70)
+
+	InitTitle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#FFFFFF")).
+			Background(lipgloss.Color("#005F87")).
+			Padding(0, 1)
+
+	InitStep = lipgloss.NewStyle().Foreground(lipgloss.Color("250"))
+
+	InitSubStep = InitStep.Italic(true)
+
+	InitPath = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFD700")).Bold(true)
+
+	InitHint = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 )

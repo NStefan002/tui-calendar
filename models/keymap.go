@@ -220,3 +220,24 @@ var addEventViewKeys = addEventViewKeyMap{
 		key.WithHelp("ctrl+s", "submit"),
 	),
 }
+
+type initViewKeyMap struct {
+	Quit key.Binding
+}
+
+func (k initViewKeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Quit}
+}
+
+func (k initViewKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Quit},
+	}
+}
+
+var initViewKeys = initViewKeyMap{
+	Quit: key.NewBinding(
+		key.WithKeys("q", tea.KeyCtrlC.String()),
+		key.WithHelp("q/ctrl+c", "quit"),
+	),
+}

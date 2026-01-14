@@ -35,6 +35,14 @@ func AppConfigDir() (string, error) {
 	return path, nil
 }
 
+func CredentialsFilePath() (string, error) {
+	cfgDir, err := AppConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(cfgDir, "credentials.json"), nil
+}
+
 func tokenCacheFile() (string, error) {
 	cfgDir, err := AppConfigDir()
 	if err != nil {
@@ -69,16 +77,14 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 }
 
 func getOAuthConfig() (*oauth2.Config, error) {
-	cfgDir, err := AppConfigDir()
+	credPath, err := CredentialsFilePath()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to get credentials file path: %v", err)
 	}
-
-	credPath := filepath.Join(cfgDir, "credentials.json")
 
 	b, err := os.ReadFile(credPath)
 	if err != nil {
-		fmt.Println("First time running tui-calendar? Run `tui-calendar init`.")
+		fmt.Println("First time running tui-calendar? Run `tui-calendar --init`.")
 		return nil, fmt.Errorf("unable to read credentials file: %v", err)
 	}
 
