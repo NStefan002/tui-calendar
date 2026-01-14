@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/NStefan002/tui-calendar/compare/v2.2.0...v2.3.0) (2026-01-14)
+
+
+### Features
+
+* implement view for `init` command ([ce548f2](https://github.com/NStefan002/tui-calendar/commit/ce548f2ad23988a573d923d4ce384dbfd821d202))
+
 ## [2.2.0](https://github.com/NStefan002/tui-calendar/compare/v2.1.0...v2.2.0) (2026-01-13)
 
 
