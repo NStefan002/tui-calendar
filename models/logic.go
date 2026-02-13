@@ -5,10 +5,10 @@ import (
 	"log"
 
 	"github.com/NStefan002/tui-calendar/v2/google"
-	"github.com/NStefan002/tui-calendar/v2/utils"
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -252,12 +252,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	if m.loading {
-		return utils.CenterText(m.spinner.View()+" Loading calendar events...", m.screenWidth)
+		return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, m.spinner.View()+" Loading calendar events...")
 	}
 
 	if len(m.errMessage) > 0 {
-		// return "There was an error: " + m.errMessage
-		return errorView(m.errMessage, m.screenWidth)
+		return errorView(m.errMessage, m.screenWidth, m.screenHeight)
 	}
 
 	switch m.viewMode {

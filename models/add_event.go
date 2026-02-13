@@ -12,7 +12,6 @@ import (
 	"google.golang.org/api/calendar/v3"
 
 	"github.com/NStefan002/tui-calendar/v2/styles"
-	"github.com/NStefan002/tui-calendar/v2/utils"
 )
 
 type repeatOption int
@@ -126,7 +125,7 @@ func (am *addEventModel) view(m *model) string {
 
 	// Header
 	header := styles.Header.Render(fmt.Sprintf("➕ Add Event for %s", m.cm.selected.Format("January 2, 2006")))
-	sb.WriteString(utils.CenterText(header, m.screenWidth) + "\n\n")
+	sb.WriteString(lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, header) + "\n\n")
 
 	formFields := []string{
 		lipgloss.JoinHorizontal(lipgloss.Top, styles.FieldLabel.Render("Title:"), am.titleInput.View()),
@@ -150,11 +149,11 @@ func (am *addEventModel) view(m *model) string {
 		Padding(1, 2).
 		Render(form)
 
-	sb.WriteString(utils.CenterText(box, m.screenWidth))
+	sb.WriteString(lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, box))
 
 	// help text
 	help := m.help.View(m.addEventViewKeys)
-	sb.WriteString("\n\n" + utils.CenterText(help, m.screenWidth))
+	sb.WriteString("\n\n" + lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, help))
 
 	return sb.String()
 }

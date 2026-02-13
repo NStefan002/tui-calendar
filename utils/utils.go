@@ -1,25 +1,10 @@
 package utils
 
 import (
-	"strings"
 	"time"
 
-	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 )
-
-// center each line of text based on the screen width
-func CenterText(text string, width int) string {
-	// calculate the padding needed to center the text
-	padding := max((width-lipgloss.Width(text))/2, 0)
-
-	// split the text into lines and center each line
-	lines := strings.Split(text, "\n")
-	for i, line := range lines {
-		lines[i] = strings.Repeat(" ", padding) + line
-	}
-	return strings.Join(lines, "\n")
-}
 
 func FormatTime(dt *calendar.EventDateTime) string {
 	if dt.DateTime != "" {

@@ -10,7 +10,7 @@ var (
 	Base = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#DADADA")).
 		Background(lipgloss.Color("#1E1E1E")).
-		Padding(0, 1)
+		Padding(0, 1).Align(lipgloss.Center)
 
 	Header = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FFFFFF")).
@@ -94,11 +94,10 @@ var (
 
 	TimeLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#AAAAAA")).
-			Bold(true)
+			Bold(true).Padding(0, 1)
 
 	TimeValue = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFFFF")).
-			PaddingLeft(1)
+			Foreground(lipgloss.Color("#FFFFFF"))
 
 	Description = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#C0C0C0")).

@@ -6,7 +6,6 @@ import (
 
 	"github.com/NStefan002/tui-calendar/v2/google"
 	"github.com/NStefan002/tui-calendar/v2/styles"
-	"github.com/NStefan002/tui-calendar/v2/utils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -90,22 +89,28 @@ func (m initModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m initModel) View() string {
 	if m.errMessage != "" {
-		return errorView(m.errMessage, m.screenWidth)
+		return errorView(m.errMessage, m.screenWidth, m.screenHeight)
 	}
-	return lipgloss.JoinVertical(
-		lipgloss.Left,
-		m.getHeader(),
-		m.viewport.View(),
-		m.getFooter(),
+	return lipgloss.Place(
+		m.screenWidth,
+		m.screenHeight,
+		lipgloss.Center,
+		lipgloss.Top,
+		lipgloss.JoinVertical(
+			lipgloss.Left,
+			m.getHeader(),
+			m.viewport.View(),
+			m.getFooter(),
+		),
 	)
 }
 
 func (m initModel) getHeader() string {
-	return utils.CenterText(styles.InitTitle.Render("Welcome to tui-calendar setup instructions!"), m.screenWidth)
+	return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, styles.InitTitle.Render("Welcome to tui-calendar setup instructions!"))
 }
 
 func (m initModel) getFooter() string {
-	return utils.CenterText(m.help.View(m.keys), m.screenWidth)
+	return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, m.help.View(m.keys))
 }
 
 func (m initModel) getContent() string {
@@ -123,7 +128,7 @@ func (m initModel) getContent() string {
 			styles.InitStep.Render("You can now run: ")+styles.InitHint.Render("tui-calendar")+styles.InitStep.Render(" to start the application!"),
 		)
 		box := styles.InitBox.Render(content)
-		return utils.CenterText(box, m.screenWidth)
+		return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, box)
 	}
 
 	content := lipgloss.JoinVertical(
@@ -164,5 +169,5 @@ func (m initModel) getContent() string {
 
 	box := styles.InitBox.Render(content)
 
-	return utils.CenterText(box, m.screenWidth)
+	return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, box)
 }

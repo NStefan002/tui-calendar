@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/NStefan002/tui-calendar/v2/styles"
-	"github.com/NStefan002/tui-calendar/v2/utils"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -24,7 +23,7 @@ func (dm *eventDetailsModel) view(m *model) string {
 	dateKey := m.cm.selected.Format("2006-01-02")
 	selectedEvents := m.events[dateKey]
 	if len(selectedEvents) == 0 {
-		return utils.CenterText("No events for this day.", m.screenWidth)
+		return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, "No events for this day.")
 	}
 
 	selected := selectedEvents[dm.idx]
@@ -52,7 +51,7 @@ func (dm *eventDetailsModel) view(m *model) string {
 	if eventTitle == "" {
 		eventTitle = "[No Title]"
 	}
-	right.WriteString(utils.CenterText(styles.DetailTitle.Render(eventTitle), 50) + "\n\n")
+	right.WriteString(lipgloss.PlaceHorizontal(50, lipgloss.Center, styles.DetailTitle.Render(eventTitle)) + "\n\n")
 
 	// times
 	startStr, endStr := "", ""
@@ -97,5 +96,5 @@ func (dm *eventDetailsModel) view(m *model) string {
 
 	helpText := m.help.View(m.eventDetailsViewKeys)
 
-	return utils.CenterText(main, m.screenWidth) + "\n\n" + utils.CenterText(helpText, m.screenWidth)
+	return lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, main) + "\n\n" + lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, helpText)
 }
