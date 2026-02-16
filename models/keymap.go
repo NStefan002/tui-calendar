@@ -14,6 +14,7 @@ type calendarViewKeyMap struct {
 	NextMonth key.Binding
 	PrevYear  key.Binding
 	NextYear  key.Binding
+	CurrDay   key.Binding
 	Quit      key.Binding
 	Help      key.Binding
 	Refresh   key.Binding
@@ -29,7 +30,7 @@ func (k calendarViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.PrevDay, k.NextDay, k.PrevWeek, k.NextWeek},
 		{k.PrevMonth, k.NextMonth, k.PrevYear, k.NextYear},
-		{k.ViewEvent, k.AddEvent},
+		{k.CurrDay, k.ViewEvent, k.AddEvent},
 		{k.Refresh, k.Help, k.Quit},
 	}
 }
@@ -66,6 +67,10 @@ var calendarViewKeys = calendarViewKeyMap{
 	NextYear: key.NewBinding(
 		key.WithKeys(tea.KeyCtrlPgDown.String(), "}"),
 		key.WithHelp("shift+pgdown/}", "next year"),
+	),
+	CurrDay: key.NewBinding(
+		key.WithKeys(tea.KeyHome.String(), tea.KeyCtrlO.String()),
+		key.WithHelp("home/ctrl+o", "focus current day"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("q", tea.KeyCtrlC.String()),

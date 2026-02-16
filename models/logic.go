@@ -73,6 +73,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cm.selected = m.cm.selected.AddDate(-1, 0, 0) // go to previous year
 			case key.Matches(msg, m.calendarViewKeys.NextYear):
 				m.cm.selected = m.cm.selected.AddDate(1, 0, 0) // go to next year
+			case key.Matches(msg, m.calendarViewKeys.CurrDay):
+				m.cm.selected = m.cm.now // go to current day
 			case key.Matches(msg, m.calendarViewKeys.Refresh):
 				m.loading = true
 				return m, tea.Batch(
