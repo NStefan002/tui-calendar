@@ -69,6 +69,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cm.selected = m.cm.selected.AddDate(0, -1, 0) // go to previous month
 			case key.Matches(msg, m.calendarViewKeys.NextMonth):
 				m.cm.selected = m.cm.selected.AddDate(0, 1, 0) // go to next month
+			case key.Matches(msg, m.calendarViewKeys.PrevYear):
+				m.cm.selected = m.cm.selected.AddDate(-1, 0, 0) // go to previous year
+			case key.Matches(msg, m.calendarViewKeys.NextYear):
+				m.cm.selected = m.cm.selected.AddDate(1, 0, 0) // go to next year
 			case key.Matches(msg, m.calendarViewKeys.Refresh):
 				m.loading = true
 				return m, tea.Batch(
