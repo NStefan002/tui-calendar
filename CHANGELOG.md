@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/NStefan002/tui-calendar/compare/v2.3.0...v2.4.0) (2026-02-16)
+
+
+### Features
+
+* add keybindings for jumping to the next/prev year ([72fe8be](https://github.com/NStefan002/tui-calendar/commit/72fe8be2578e1103d061ddfe3a1662a192db71e9)), closes [#9](https://github.com/NStefan002/tui-calendar/issues/9)
+
 ## [2.3.0](https://github.com/NStefan002/tui-calendar/compare/v2.2.0...v2.3.0) (2026-01-14)
 
 
