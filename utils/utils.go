@@ -3,6 +3,7 @@ package utils
 import (
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 )
 
@@ -26,4 +27,21 @@ func HasEvents(events map[string][]*calendar.Event, day time.Time) bool {
 	dateKey := day.Format("2006-01-02")
 	_, exists := events[dateKey]
 	return exists && len(events[dateKey]) > 0
+}
+
+func TruncateString(s string, maxWidth int, style lipgloss.Style) string {
+	styled := style.Render(s)
+	if lipgloss.Width(styled) <= maxWidth {
+		return styled
+	}
+
+	runes := []rune(s)
+	for len(runes) > 0 {
+		candidate := style.Render(string(runes) + "...")
+		if lipgloss.Width(candidate) <= maxWidth {
+			return candidate
+		}
+		runes = runes[:len(runes)-1]
+	}
+	return style.Render("...")
 }

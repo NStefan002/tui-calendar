@@ -113,21 +113,7 @@ func (cm *calendarModel) view(m *model) string {
 			minGap := 1
 			available := calWidth - lipgloss.Width(timeStr) - minGap
 
-			titleStr := styles.Event.Render(title)
-			if lipgloss.Width(titleStr) > available {
-				runes := []rune(title)
-				for len(runes) > 0 {
-					candidate := string(runes) + "..."
-					if lipgloss.Width(styles.Event.Render(candidate)) <= available {
-						titleStr = styles.Event.Render(candidate)
-						break
-					}
-					runes = runes[:len(runes)-1]
-				}
-				if len(runes) == 0 {
-					titleStr = styles.Event.Render("...")
-				}
-			}
+			titleStr := utils.TruncateString(title, available, styles.Event)
 
 			gap := max(available-lipgloss.Width(titleStr), minGap)
 
