@@ -136,25 +136,26 @@ func (cm *calendarModel) view(m *model) string {
 		)
 	}
 
-	helpText := m.help.View(m.calendarViewKeys)
+	helpText := lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, m.help.View(m.calendarViewKeys))
 
-	return lipgloss.Place(
-		m.screenWidth,
-		m.screenHeight,
-		lipgloss.Center,
+	calendarContent := lipgloss.PlaceHorizontal(m.screenWidth, lipgloss.Center, lipgloss.JoinVertical(
 		lipgloss.Top,
-		lipgloss.JoinVertical(
-			lipgloss.Top,
-			"",
-			"",
-			header,
-			"",
-			"",
-			daysLine,
-			dates,
-			eventsBlock,
-			"",
-			helpText,
-		),
+		"",
+		"",
+		header,
+		"",
+		"",
+		daysLine,
+		dates,
+		eventsBlock,
+	))
+
+    allContent := lipgloss.JoinVertical(
+		lipgloss.Top,
+		calendarContent,
+		"",
+		helpText,
 	)
+
+    return lipgloss.PlaceVertical(m.screenHeight, lipgloss.Top, allContent)
 }
