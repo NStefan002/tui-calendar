@@ -150,12 +150,12 @@ func (cm *calendarModel) view(m *model) string {
 		eventsBlock,
 	))
 
-    allContent := lipgloss.JoinVertical(
+	allContent := lipgloss.JoinVertical(
 		lipgloss.Top,
 		calendarContent,
 		"",
 		helpText,
 	)
 
-    return lipgloss.PlaceVertical(m.screenHeight, lipgloss.Top, allContent)
+	return lipgloss.PlaceVertical(m.screenHeight, lipgloss.Top, allContent)
 }
