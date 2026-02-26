@@ -113,7 +113,7 @@ func (cm *calendarModel) view(m *model) string {
 			minGap := 1
 			available := calWidth - lipgloss.Width(timeStr) - minGap
 
-			titleStr := utils.TruncateString(title, available, styles.Event)
+			titleStr := styles.Event.Render(utils.TruncateString(title, available, styles.Event))
 
 			gap := max(available-lipgloss.Width(titleStr), minGap)
 

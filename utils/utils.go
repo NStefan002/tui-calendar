@@ -29,19 +29,21 @@ func HasEvents(events map[string][]*calendar.Event, day time.Time) bool {
 	return exists && len(events[dateKey]) > 0
 }
 
+// truncates a string to fit within maxWidth, adding "..." if truncated,
+// comparing the width of the styled string to maxWidth
 func TruncateString(s string, maxWidth int, style lipgloss.Style) string {
 	styled := style.Render(s)
 	if lipgloss.Width(styled) <= maxWidth {
-		return styled
+		return s
 	}
 
 	runes := []rune(s)
 	for len(runes) > 0 {
 		candidate := style.Render(string(runes) + "...")
 		if lipgloss.Width(candidate) <= maxWidth {
-			return candidate
+			return string(runes) + "..."
 		}
 		runes = runes[:len(runes)-1]
 	}
-	return style.Render("...")
+	return "..."
 }
