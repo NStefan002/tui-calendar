@@ -99,20 +99,22 @@ func (dm *eventDetailsModel) getDescription(event *calendar.Event, maxWidth int)
 }
 
 func (dm *eventDetailsModel) getTimes(event *calendar.Event, maxWidth int) string {
+	if event.Start != nil && event.Start.Date != "" {
+		return lipgloss.PlaceHorizontal(maxWidth, lipgloss.Center, styles.TimeValue.Render("All-day event"))
+	}
+
 	startStr, endStr := "", ""
 	if event.Start != nil && event.Start.DateTime != "" {
 		startTime, err := time.Parse(time.RFC3339, event.Start.DateTime)
 		if err == nil {
 			startStr = styles.TimeLabel.Render("Start: ") + styles.TimeValue.Render(startTime.Format("Mon, Jan 2 — 15:04"))
 		}
-		if event.End != nil && event.End.DateTime != "" {
-			endTime, err := time.Parse(time.RFC3339, event.End.DateTime)
-			if err == nil {
-				endStr = styles.TimeLabel.Render("End:   ") + styles.TimeValue.Render(endTime.Format("Mon, Jan 2 — 15:04"))
-			}
+	}
+	if event.End != nil && event.End.DateTime != "" {
+		endTime, err := time.Parse(time.RFC3339, event.End.DateTime)
+		if err == nil {
+			endStr = styles.TimeLabel.Render("End:   ") + styles.TimeValue.Render(endTime.Format("Mon, Jan 2 — 15:04"))
 		}
-	} else if event.Start != nil && event.Start.Date != "" {
-		startStr = styles.TimeValue.Render("All-day event")
 	}
 	return lipgloss.PlaceHorizontal(maxWidth, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, startStr, endStr))
 }
