@@ -48,7 +48,7 @@ func (dm *eventDetailsModel) view(m *model) string {
 	dm.viewport.Width = rightWidth - 4 // account for padding
 	title := dm.getTitle(selected, dm.viewport.Width)
 	times := dm.getTimes(selected, dm.viewport.Width)
-	location := dm.getLocation(selected, rightWidth)
+	location := dm.getLocation(selected, dm.viewport.Width)
 	dm.viewport.Height = m.screenHeight - lipgloss.Height(title) - lipgloss.Height(times) - lipgloss.Height(location) - lipgloss.Height(m.help.View(m.eventDetailsViewKeys)) - 5
 	dm.viewport.SetContent(dm.getDescription(selected, dm.viewport.Width))
 	right := styles.Box.Render(lipgloss.JoinVertical(lipgloss.Left,
