@@ -98,6 +98,8 @@ type eventDetailsViewKeyMap struct {
 	Quit        key.Binding
 	Back        key.Binding
 	Help        key.Binding
+	NextEvent   key.Binding
+	PrevEvent   key.Binding
 	ScrollDown  key.Binding
 	ScrollUp    key.Binding
 	EditEvent   key.Binding
@@ -111,7 +113,7 @@ func (k eventDetailsViewKeyMap) ShortHelp() []key.Binding {
 
 func (k eventDetailsViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.ScrollUp, k.ScrollDown},
+		{k.PrevEvent, k.NextEvent, k.ScrollUp, k.ScrollDown},
 		{k.EditEvent, k.AddEvent, k.DeleteEvent},
 		{k.Back, k.Quit, k.Help},
 	}
@@ -130,13 +132,21 @@ var eventDetailsViewKeys = eventDetailsViewKeyMap{
 		key.WithKeys("?"),
 		key.WithHelp("?", "toggle help"),
 	),
-	ScrollDown: key.NewBinding(
+	NextEvent: key.NewBinding(
 		key.WithKeys(tea.KeyDown.String(), "j"),
-		key.WithHelp("↓/j", "scroll down"),
+		key.WithHelp("↓/j", "next event"),
+	),
+	PrevEvent: key.NewBinding(
+		key.WithKeys(tea.KeyUp.String(), "k"),
+		key.WithHelp("↑/k", "previous event"),
+	),
+	ScrollDown: key.NewBinding(
+		key.WithKeys(tea.KeyPgDown.String(), tea.KeyCtrlD.String()),
+		key.WithHelp("pgdown/ctrl+d", "scroll down event details"),
 	),
 	ScrollUp: key.NewBinding(
-		key.WithKeys(tea.KeyUp.String(), "k"),
-		key.WithHelp("↑/k", "scroll up"),
+		key.WithKeys(tea.KeyPgUp.String(), tea.KeyCtrlU.String()),
+		key.WithHelp("pgup/ctrl+u", "scroll up event details"),
 	),
 	EditEvent: key.NewBinding(
 		key.WithKeys("e", "E"),

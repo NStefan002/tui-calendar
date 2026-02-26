@@ -107,16 +107,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			case key.Matches(msg, m.eventDetailsViewKeys.Back):
 				m.viewMode = calendarView
+				m.dm.reset()
 			case key.Matches(msg, m.eventDetailsViewKeys.Help):
 				m.help.ShowAll = !m.help.ShowAll
-			case key.Matches(msg, m.eventDetailsViewKeys.ScrollDown):
+			case key.Matches(msg, m.eventDetailsViewKeys.NextEvent):
 				if len(m.events) > 0 && m.dm.idx < len(m.events[m.cm.selected.Format("2006-01-02")])-1 {
 					m.dm.idx++
 				}
-			case key.Matches(msg, m.eventDetailsViewKeys.ScrollUp):
+			case key.Matches(msg, m.eventDetailsViewKeys.PrevEvent):
 				if m.dm.idx > 0 {
 					m.dm.idx--
 				}
+			case key.Matches(msg, m.eventDetailsViewKeys.ScrollDown):
+				m.dm.viewport.ScrollDown(1)
+			case key.Matches(msg, m.eventDetailsViewKeys.ScrollUp):
+				m.dm.viewport.ScrollUp(1)
 			case key.Matches(msg, m.eventDetailsViewKeys.EditEvent):
 				m.viewMode = editEventView
 				m.lastViewMode = eventDetailsView

@@ -45,13 +45,13 @@ var (
 	EventDetails = lipgloss.NewStyle().
 			Padding(1, 2).
 			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#5F5F5F")).
-			Width(50)
+			BorderForeground(lipgloss.Color("#5F5F5F"))
 
 	EventList = Base.
-			Padding(0, 1).
-			Border(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("#3A3A3A"))
+			Padding(1, 0, 1, 0).
+			Margin(1, 0, 0, 0)
+		// Border(lipgloss.NormalBorder()).
+		// BorderForeground(lipgloss.Color("#3A3A3A"))
 
 	EventListSelected = EventList.
 				Background(lipgloss.Color("#5F00AF")).
@@ -72,7 +72,7 @@ var (
 	Box = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
 		Padding(1, 2).
-		Margin(1, 0).
+		// Margin(1, 0, 0, 0).
 		BorderForeground(lipgloss.Color("240"))
 
 	FieldLabel = lipgloss.NewStyle().
@@ -90,7 +90,9 @@ var (
 			Bold(true).
 			Foreground(lipgloss.Color("#FFFFFF")).
 			Background(lipgloss.Color("#005F87")).
-			Padding(0, 1)
+			Padding(0, 1).
+			MarginBottom(1).
+			Align(lipgloss.Center)
 
 	TimeLabel = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#AAAAAA")).
@@ -127,8 +129,7 @@ var (
 
 	InitBox = lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
-		Padding(1, 2).
-		Width(70)
+		Padding(1, 2)
 
 	InitTitle = lipgloss.NewStyle().
 			Bold(true).
