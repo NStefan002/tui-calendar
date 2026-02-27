@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.5.0](https://github.com/NStefan002/tui-calendar/compare/v2.4.0...v2.5.0) (2026-02-26)
+
+
+### Features
+
+* **calendar_view:** add keymap for focusing current day ([65c9bb3](https://github.com/NStefan002/tui-calendar/commit/65c9bb3718f5c7ea719f0ac21d394de06dc75001))
+* **event_details:** redesign event details view ui ([77a7848](https://github.com/NStefan002/tui-calendar/commit/77a7848c21f7b252b7db0a6e5f857656a9b915d0))
+
+
+### Bug Fixes
+
+* **calendar_view:** correctly center calendar and help ([d6c20ce](https://github.com/NStefan002/tui-calendar/commit/d6c20cece0afdef87382f984ebf658181e5cb149))
+* **event_details:** location width ([399b678](https://github.com/NStefan002/tui-calendar/commit/399b67867f3e52f8efe45f9f7bfcbac9b60e10c7))
+
 ## [2.4.0](https://github.com/NStefan002/tui-calendar/compare/v2.3.0...v2.4.0) (2026-02-16)
 
 
