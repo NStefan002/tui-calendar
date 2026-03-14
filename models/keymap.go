@@ -207,11 +207,11 @@ var addEventViewKeys = addEventViewKeyMap{
 	),
 	MinuteUp: key.NewBinding(
 		key.WithKeys(tea.KeyRight.String(), "l"),
-        key.WithHelp("→/l", "increase minutes"),
+		key.WithHelp("→/l", "increase minutes"),
 	),
 	MinuteDown: key.NewBinding(
 		key.WithKeys(tea.KeyLeft.String(), "h"),
-        key.WithHelp("←/h", "decrease minutes"),
+		key.WithHelp("←/h", "decrease minutes"),
 	),
 	HourUp: key.NewBinding(
 		key.WithKeys(tea.KeyUp.String(), "k"),
