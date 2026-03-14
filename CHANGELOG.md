@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/NStefan002/tui-calendar/compare/v2.5.0...v2.6.0) (2026-03-14)
+
+
+### Features
+
+* **keymap:** more intuitive keybindings for add/edit event view ([b32378d](https://github.com/NStefan002/tui-calendar/commit/b32378daafc65b3fdeef7ad33fb1b256c343a932))
+
 ## [2.5.0](https://github.com/NStefan002/tui-calendar/compare/v2.4.0...v2.5.0) (2026-02-26)
 
 
