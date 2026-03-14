@@ -206,20 +206,20 @@ var addEventViewKeys = addEventViewKeyMap{
 		key.WithHelp("?", "toggle help"),
 	),
 	MinuteUp: key.NewBinding(
-		key.WithKeys(tea.KeyCtrlUp.String(), "K"),
-		key.WithHelp("ctrl+↑/K", "increase minutes"),
+		key.WithKeys(tea.KeyRight.String(), "l"),
+        key.WithHelp("→/l", "increase minutes"),
 	),
 	MinuteDown: key.NewBinding(
-		key.WithKeys(tea.KeyCtrlDown.String(), "J"),
-		key.WithHelp("ctrl+↓/J", "decrease minutes"),
+		key.WithKeys(tea.KeyLeft.String(), "h"),
+        key.WithHelp("←/h", "decrease minutes"),
 	),
 	HourUp: key.NewBinding(
-		key.WithKeys("alt+up", "k"),
-		key.WithHelp("alt+↑/k", "increase hours"),
+		key.WithKeys(tea.KeyUp.String(), "k"),
+		key.WithHelp("↑/k", "increase hours"),
 	),
 	HourDown: key.NewBinding(
-		key.WithKeys("alt+down", "j"),
-		key.WithHelp("alt+↓/j", "decrease hours"),
+		key.WithKeys(tea.KeyDown.String(), "j"),
+		key.WithHelp("↓/j", "decrease hours"),
 	),
 	NextRepeatOpt: key.NewBinding(
 		key.WithKeys("l", tea.KeyRight.String()),
@@ -234,12 +234,12 @@ var addEventViewKeys = addEventViewKeyMap{
 		key.WithHelp("enter/space", "toggle all-day event"),
 	),
 	NextField: key.NewBinding(
-		key.WithKeys(tea.KeyTab.String(), tea.KeyDown.String(), tea.KeyCtrlN.String()),
-		key.WithHelp("tab/↓/ctrl+n", "next field"),
+		key.WithKeys(tea.KeyTab.String(), tea.KeyCtrlN.String()),
+		key.WithHelp("tab/ctrl+n", "next field"),
 	),
 	PreviousField: key.NewBinding(
-		key.WithKeys(tea.KeyShiftTab.String(), tea.KeyUp.String(), tea.KeyCtrlP.String()),
-		key.WithHelp("shift+tab/↑/ctrl+p", "previous field"),
+		key.WithKeys(tea.KeyShiftTab.String(), tea.KeyCtrlP.String()),
+		key.WithHelp("shift+tab/ctrl+p", "previous field"),
 	),
 	Submit: key.NewBinding(
 		key.WithKeys(tea.KeyCtrlS.String()),
