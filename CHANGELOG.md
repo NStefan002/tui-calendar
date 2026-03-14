@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/NStefan002/tui-calendar/compare/v2.6.0...v2.7.0) (2026-03-14)
+
+
+### Features
+
+* edit field in `$EDITOR` in add/edit event views ([e7676ed](https://github.com/NStefan002/tui-calendar/commit/e7676edbf5c3ad7b013f198f20377148fff378e1))
+
 ## [2.6.0](https://github.com/NStefan002/tui-calendar/compare/v2.5.0...v2.6.0) (2026-03-14)
 
 
