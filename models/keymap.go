@@ -175,6 +175,7 @@ type addEventViewKeyMap struct {
 	Check         key.Binding
 	NextField     key.Binding
 	PreviousField key.Binding
+	EditInEditor  key.Binding
 	Submit        key.Binding
 }
 
@@ -186,7 +187,7 @@ func (k addEventViewKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.NextField, k.PreviousField},
 		{k.MinuteUp, k.MinuteDown, k.HourUp, k.HourDown},
-		{k.NextRepeatOpt, k.PrevRepeatOpt},
+		{k.NextRepeatOpt, k.PrevRepeatOpt, k.EditInEditor},
 		{k.Check, k.Submit},
 		{k.Back, k.Quit, k.Help},
 	}
@@ -240,6 +241,10 @@ var addEventViewKeys = addEventViewKeyMap{
 	PreviousField: key.NewBinding(
 		key.WithKeys(tea.KeyShiftTab.String(), tea.KeyCtrlP.String()),
 		key.WithHelp("shift+tab/ctrl+p", "previous field"),
+	),
+	EditInEditor: key.NewBinding(
+		key.WithKeys(tea.KeyCtrlE.String()),
+		key.WithHelp("ctrl+e", "edit field in $EDITOR"),
 	),
 	Submit: key.NewBinding(
 		key.WithKeys(tea.KeyCtrlS.String()),

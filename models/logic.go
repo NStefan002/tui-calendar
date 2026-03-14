@@ -14,6 +14,12 @@ import (
 
 type errMsg struct{ error }
 
+type editorFinishedMsg struct {
+	field int
+	value string
+	err   error
+}
+
 type eventsMsg map[string][]*calendar.Event
 
 func (m model) Init() tea.Cmd {
@@ -45,6 +51,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case errMsg:
 		m.loading = false
 		m.errMessage = msg.Error()
+
+	case editorFinishedMsg:
+		if msg.err != nil {
+			m.errMessage = fmt.Sprintf("Editor error: %v", msg.err)
+			return m, nil
+		}
+
+		switch msg.field {
+		case 0:
+			m.am.titleInput.SetValue(msg.value)
+		case 1:
+			m.am.descriptionInput.SetValue(msg.value)
+		}
+
+		return m, nil
 
 	case tea.KeyMsg:
 		// clear error message on any key press
@@ -188,6 +209,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.am.changeFocus(+1)
 			case key.Matches(msg, m.addEventViewKeys.PreviousField):
 				m.am.changeFocus(-1)
+			case key.Matches(msg, m.addEventViewKeys.EditInEditor):
+				return m, m.am.editFieldCmd()
 			case key.Matches(msg, m.addEventViewKeys.Submit):
 				if m.viewMode == editEventView {
 					// updating existing event

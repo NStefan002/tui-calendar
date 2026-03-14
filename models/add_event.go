@@ -3,15 +3,19 @@ package models
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"google.golang.org/api/calendar/v3"
 
 	"github.com/NStefan002/tui-calendar/v2/styles"
+	"github.com/NStefan002/tui-calendar/v2/utils"
 )
 
 type repeatOption int
@@ -631,4 +635,59 @@ func (am *addEventModel) submitEditEventForm(event *calendar.Event) (*calendar.E
 	}
 
 	return event, nil
+}
+
+// - only works if editing title or description
+// - opens the $EDITOR for editing the field value
+// - after closing the editor, updates the field value with the edited content
+func (am *addEventModel) editFieldCmd() tea.Cmd {
+	if am.idx != 0 && am.idx != 1 {
+		return nil
+	}
+
+	field := am.idx
+
+	var currentValue string
+	if field == 0 {
+		currentValue = am.titleInput.Value()
+	} else {
+		currentValue = am.descriptionInput.Value()
+	}
+
+	editor := utils.GetEditor()
+
+	tmpFile, err := os.CreateTemp("", "event_edit_*.txt")
+	if err != nil {
+		return func() tea.Msg {
+			return editorFinishedMsg{field: field, err: err}
+		}
+	}
+
+	if _, err := tmpFile.WriteString(currentValue); err != nil {
+		return func() tea.Msg {
+			return editorFinishedMsg{field: field, err: err}
+		}
+	}
+
+	_ = tmpFile.Close()
+
+	cmd := exec.Command(editor, tmpFile.Name())
+
+	return tea.ExecProcess(cmd, func(err error) tea.Msg {
+		if err != nil {
+			return editorFinishedMsg{field: field, err: err}
+		}
+
+		data, readErr := os.ReadFile(tmpFile.Name())
+		if readErr != nil {
+			return editorFinishedMsg{field: field, err: readErr}
+		}
+
+		_ = os.Remove(tmpFile.Name())
+
+		return editorFinishedMsg{
+			field: field,
+			value: strings.TrimSpace(string(data)),
+		}
+	})
 }

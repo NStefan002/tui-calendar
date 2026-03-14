@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
@@ -46,4 +47,12 @@ func TruncateString(s string, maxWidth int, style lipgloss.Style) string {
 		runes = runes[:len(runes)-1]
 	}
 	return "..."
+}
+
+func GetEditor() string {
+	editor := "vim" // default editor
+	if envEditor := os.Getenv("EDITOR"); envEditor != "" {
+		editor = envEditor
+	}
+	return editor
 }
