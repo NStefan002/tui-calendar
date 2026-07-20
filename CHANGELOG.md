@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/NStefan002/tui-calendar/compare/v2.7.0...v2.7.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **add_event:** remove time zone from event config ([#15](https://github.com/NStefan002/tui-calendar/issues/15)) ([9cbb031](https://github.com/NStefan002/tui-calendar/commit/9cbb031b237317316216d9a979432009babb7d05))
+
 ## [2.7.0](https://github.com/NStefan002/tui-calendar/compare/v2.6.0...v2.7.0) (2026-03-14)
 
 
