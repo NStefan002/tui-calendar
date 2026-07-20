@@ -526,8 +526,6 @@ func (am *addEventModel) submitAddEventForm() (*calendar.Event, error) {
 		)
 	}
 
-	tz, _ := time.Now().Local().Zone()
-
 	// build event
 	event := &calendar.Event{
 		Summary:     am.title,
@@ -535,11 +533,9 @@ func (am *addEventModel) submitAddEventForm() (*calendar.Event, error) {
 		Location:    am.location,
 		Start: &calendar.EventDateTime{
 			DateTime: am.startTime.Format(time.RFC3339),
-			TimeZone: tz,
 		},
 		End: &calendar.EventDateTime{
 			DateTime: am.endTime.Format(time.RFC3339),
-			TimeZone: tz,
 		},
 	}
 
